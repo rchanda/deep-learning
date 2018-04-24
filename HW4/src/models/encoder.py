@@ -10,7 +10,7 @@ from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
 class EncoderRNN(nn.Module):
 	def __init__(self, input_size, hidden_size, key_size, value_size, num_layers, bidirectional, p):
-		super(EncoderRNN, self).__init__()
+		super(EncoderRNN, self).__init__(input_size, hidden_size, key_size, value_size, num_layers, bidirectional, p)
 		self.input_size = input_size
 		self.hidden_size = hidden_size
 		self.key_size = key_size
@@ -31,14 +31,21 @@ class EncoderRNN(nn.Module):
 
 	def forward(self, input_variable, input_lengths):
 		print(input_variable.size(), len(input_lengths))
-		
+
 		# input_variable (L, B, 40)
 		inputs_packed = pack_padded_sequence(input_variable, input_lengths)
 		output, hidden = self.rnn(inputs_packed)
 		output, _ = pad_packed_sequence(output)
-		# output = (L, B, 2*H)
+		# output = (L, B, 2H)
 		# hidden = (num_layers*2, B, H)
 		
+		# output.transpose(1,0)
+		# output = (B, L, 2H)
+		#if output.size(1)%2 != 0:
+		#	output = output[:,:-1,:]
+		
+		#output.view(output.size(0), output.size(1)/2, output.size(2)*2)
+		# output = (B, L/2, 2*2H)
 
 		keys = self.linear_keys(output)
 		#keys (L, B, K)
@@ -59,7 +66,7 @@ def _test():
 	input_len = 5
 	batch_size = 4
 	input_size = 10
-	input_variable = U.var(torch.randn(input_len, batch_size, input_size).float())
+	input_variable = U.var(torch.randn(input_len, batch_size, input_size).contiguous())
 	input_lengths = list(range(1, batch_size+1))
 
 	hidden_size = 5
