@@ -1,8 +1,8 @@
 import numpy as np
 
 import constants as C
-import utils as U
-from language import Lang
+import data.utils as U
+from data.language import Lang
 
 from torch.utils.data.dataset import Dataset
 
@@ -20,13 +20,13 @@ class SpeechDataset(Dataset):
                 self.trans.append(trans_indices)
             self.trans = np.asarray(self.trans)
 
-        assert(self.feats.shape[0] == self.trans.shape[0])
+        assert(self.feats.shape[0] == len(self.trans))
         self.len = self.feats.shape[0]
 
     def __getitem__(self, index):
-        trans_x = np.append([C.SOS_TOKEN_IDX], self.trans[index])
-        trans_y = np.append(self.trans[index], [C.EOS_TOKEN_IDX])
-        return (self.feats[index], trans_x, trans_y)
+        trans = np.append([C.SOS_TOKEN_IDX], self.trans[index])
+        trans = np.append(trans, [C.EOS_TOKEN_IDX])
+        return (self.feats[index], trans)
 
     def __len__(self):
         return self.len

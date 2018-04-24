@@ -1,7 +1,7 @@
 import numpy as np
 
 import constants as C
-import utils as U
+import data.utils as U
 #item can be char or word
 
 class Lang:

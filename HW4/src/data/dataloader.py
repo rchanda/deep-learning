@@ -4,9 +4,9 @@ import numpy as np
 from torch.utils.data import DataLoader
 
 import constants as C
-import utils as U
-from language import Lang
-from dataset import SpeechDataset
+import data.utils as U
+from data.language import Lang
+from data.dataset import SpeechDataset
 
 class SpeechDataLoader():
 
@@ -39,18 +39,19 @@ def pad_batch_data(batch_data):
 		batch_padded.append(data_padded)
 	
 	batch_padded = np.asarray(batch_padded)
+	batch_lens = np.asarray(batch_lens)
+
 	return batch_padded, batch_lens
 
 
 def collate_fn(data):
 	data = sorted(data, key=lambda x: x[0].shape[0], reverse=True)
-	[feats_batch, trans_x_batch, trans_y_batch] = zip(*data)
+	[feats_batch, trans_batch] = zip(*data)
 
 	feats_batch_padded, feats_batch_lens = pad_batch_data(list(feats_batch))
-	trans_x_batch_padded, trans_batch_lens = pad_batch_data(list(trans_x_batch))
-	trans_y_batch_padded, trans_batch_lens = pad_batch_data(list(trans_y_batch))
+	trans_batch_padded, trans_batch_lens = pad_batch_data(list(trans_batch))
 
-	return (feats_batch_padded, feats_batch_lens, trans_x_batch_padded, trans_y_batch_padded, trans_batch_lens)
+	return (feats_batch_padded, feats_batch_lens, trans_batch_padded, trans_batch_lens)
 
 
 if __name__ == "__main__":
@@ -62,7 +63,7 @@ if __name__ == "__main__":
 	dev_dataloader = SpeechDataLoader(dev_dataset, batch_size=100)
 
 	for (batch_idx, data) in enumerate(dev_dataloader.dataloader):
-		feats_batch_padded, feats_batch_lens, trans_x_batch_padded, trans_y_batch_padded, trans_batch_lens = data
+		feats_batch_padded, feats_batch_lens, trans_batch_padded, trans_batch_lens = data
 		print(batch_idx, feats_batch_padded.shape)
 
 
