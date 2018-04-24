@@ -50,9 +50,8 @@ def _test():
 
 	las = LAS(encoder, decoder, teacher_forcing_ratio)
 	decoder_outputs = las(input_variable, input_lengths, target_variable)
-	print(decoder_outputs)
 
-
+    
 if __name__ == "__main__":
 	_test()
 
