@@ -34,6 +34,9 @@ class Attention(nn.Module):
 		assert(query.size(0) == encoder_keys.size(1))
 		assert(query.size(2) == encoder_keys.size(2))
 
+		assert(encoder_keys.size(0) == encoder_values.size(0))
+		assert(query.size(0) == encoder_values.size(1))
+
 		encoder_keys = encoder_keys.permute(1, 2, 0)
 		encoder_values = encoder_values.permute(1, 0, 2)
 		attention = torch.bmm(query, encoder_keys)

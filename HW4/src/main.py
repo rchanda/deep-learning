@@ -19,8 +19,9 @@ if __name__ == "__main__":
 	lang.init_lang(trans)
 	output_size = lang.num_items
 
+	batch_size = 32
 	dev_dataset = SpeechDataset(lang, 'dev')
-	dev_dataloader = SpeechDataLoader(dev_dataset, batch_size=100)
+	dev_dataloader = SpeechDataLoader(dev_dataset, batch_size=batch_size)
 
 	num_layers = 3
 	hidden_size = 256

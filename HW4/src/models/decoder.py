@@ -54,7 +54,7 @@ class DecoderRNN(nn.Module):
 		# decoder_targets = (batch_size, max_target_len)
 		batch_size = decoder_targets.size(0)
 		max_target_len = decoder_targets.size(1) - 1 #exclude EOS
-
+		
 		decoder_outputs = []
 
 		timestamp = 0

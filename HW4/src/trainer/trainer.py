@@ -17,8 +17,8 @@ class Trainer:
 		decoder_outputs = model(input_variables, input_lengths, target_variables)
 
 		for (step, step_output) in enumerate(decoder_outputs):
-			batch_size = target_variable.size(0)
-			loss.eval_batch(step_output.contiguous().view(batch_size, -1), target_variable[:, step + 1])
+			batch_size = target_variables.size(0)
+			loss.eval_batch(step_output.contiguous().view(batch_size, -1), target_variables[:, step + 1])
 
 		model.zero_grad()
 		loss.backward()
@@ -44,7 +44,6 @@ class Trainer:
 				target_variables = U.var(torch.from_numpy(target_variables).long())
 
 				input_variables = input_variables.transpose(0,1)
-				target_variables = target_variables.transpose(0,1)
 
 				loss = self._train_batch(model, input_variables, input_lengths, target_variables)
 				epoch_loss += loss
