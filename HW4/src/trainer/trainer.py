@@ -29,7 +29,7 @@ class Trainer:
         torch.nn.utils.clip_grad_norm_(params, max_norm=self.max_grad_norm)
         self.optimizer.step()
 
-        return acc_loss.data[0].item()
+        return acc_loss.data.item()
 
 
     def train(self, train_dataloader, model, lr, num_epochs):

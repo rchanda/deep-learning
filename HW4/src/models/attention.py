@@ -24,14 +24,13 @@ class Attention(nn.Module):
 
     def forward(self, outputs, encoder_keys, encoder_values):
         # outputs = (batch_size, 1, hidden_size)
-        # query = (batch_size, 1, key_size)
         # encoder_keys = (input_len, batch_size, key_size)
         # encoder_values = (input_len, batch_size, value_size)
-
         input_len = encoder_keys.size(0)
         batch_size = encoder_keys.size(1)
 
         query = self.linear_query(outputs)
+        # query = (batch_size, 1, key_size)
 
         encoder_keys = encoder_keys.permute(1, 2, 0)
         encoder_values = encoder_values.permute(1, 0, 2)

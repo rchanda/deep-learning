@@ -20,7 +20,7 @@ class SpeechDataset(Dataset):
                 self.trans.append(trans_indices)
             self.trans = np.asarray(self.trans)
 
-        assert(self.feats.shape[0] == len(self.trans))
+        assert(self.feats.shape[0] == self.trans.shape[0])
         self.len = self.feats.shape[0]
 
     def __getitem__(self, index):

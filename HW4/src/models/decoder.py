@@ -30,7 +30,6 @@ class DecoderRNN(nn.Module):
     def forward_step(self, input_var, decoder_hiddens, context, encoder_keys, encoder_values):
         # input_var = (batch_size, 1)
         # context = (batch_size, 1, value_size)
-
         embedding = self.embedding(input_var)
         # embedding = (batch_size, 1, embedding_size)
         decoder_input = torch.cat((embedding, context), dim=2)
@@ -55,12 +54,10 @@ class DecoderRNN(nn.Module):
     def forward(self, decoder_targets, encoder_keys, encoder_values, encoder_lens, teacher_forcing_ratio=1.0):
         # decoder_targets = (batch_size, max_target_len)
         batch_size = decoder_targets.size(0)
-        max_target_len = decoder_targets.size(1) - 1 #exclude EOS
+        max_target_len = decoder_targets.size(1)
 
         decoder_outputs = []
 
-        timestamp = 0
-        decoder_input = decoder_targets[:, timestamp].unsqueeze(1)
         decoder_hiddens = self._init_hidden_state(batch_size)
         decoder_output = decoder_hiddens[self.num_layers-1][0].unsqueeze(1)
         
@@ -71,17 +68,14 @@ class DecoderRNN(nn.Module):
         use_teacher_forcing = True 
         #if np.random.random() < teacher_forcing_ratio else False
 
-        for timestamp in range(1, max_target_len): 
+        for timestamp in range(0, max_target_len-1): 
+            decoder_input = decoder_targets[:, timestamp].unsqueeze(1)
+            
             decoder_output, decoder_hiddens, context = self.forward_step(decoder_input, decoder_hiddens, 
                                                             context, encoder_keys, encoder_values)
             step_output = decoder_output.squeeze(1)
             #symbols = decode(step_output)
             decoder_outputs.append(step_output)
-
-            if use_teacher_forcing:
-                decoder_input = decoder_targets[:, timestamp].unsqueeze(1)
-            else:
-                decoder_input = symbols
 
         return decoder_outputs
 
@@ -104,7 +98,7 @@ def _test():
     hidden_size = 12
     key_size = 10
     value_size = 10
-    embedding_size = 4
+    embedding_size = 20
     output_size = 33
     num_layers = 3
     

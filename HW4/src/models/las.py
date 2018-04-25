@@ -8,7 +8,7 @@ from models.encoder import EncoderRNN
 
 
 class LAS(nn.Module):
-	def __init__(self, encoder, decoder, teacher_forcing_ratio=1.0):
+	def __init__(self, encoder, decoder, teacher_forcing_ratio):
 		super(LAS, self).__init__()
 		self.encoder = encoder
 		self.decoder = decoder
@@ -16,7 +16,7 @@ class LAS(nn.Module):
 
 
 	def forward(self, input_variable, input_lengths, target_variable):
-		input_lengths, encoder_keys, encoder_values = self.encoder(input_variable, input_lengths)
+		encoder_keys, encoder_values, input_lengths = self.encoder(input_variable, input_lengths)
 		decoder_outputs = self.decoder(target_variable, encoder_keys, encoder_values, input_lengths, self.teacher_forcing_ratio)
 
 		return decoder_outputs
@@ -42,7 +42,7 @@ def _test():
 
 	input_variable = U.var(torch.randn(max_input_len, batch_size, input_size))
 	input_lengths = sorted(np.random.randint(low=1, high=max_input_len, size=batch_size), reverse=True)
-
+	
 	target_variable = U.var(torch.ones(batch_size, max_target_len).long())
 
 	encoder = EncoderRNN(input_size, hidden_size, key_size, value_size, num_layers, bidirectional, p)

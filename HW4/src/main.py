@@ -42,7 +42,7 @@ if __name__ == "__main__":
         las = las.cuda()
 
     num_epochs = 15
-    lr = 0.0001
+    lr = 0.001
 
     trainer = Trainer()
     trainer.train(train_dataloader, las, lr, num_epochs)

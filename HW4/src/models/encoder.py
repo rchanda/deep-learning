@@ -11,26 +11,27 @@ class EncoderRNN(nn.Module):
     def __init__(self, input_size, hidden_size, key_size, value_size, num_layers, bidirectional, p_layers):
         super(EncoderRNN, self).__init__()
         self.input_size = input_size
-        self.hidden_size = hidden_size
-        self.key_size = key_size
-        self.value_size = value_size
-        self.num_layers = num_layers
+
         self.bidirectional = bidirectional
+        self.hidden_size = hidden_size
+        self.num_layers = num_layers
         self.p_layers = p_layers
 
-        self.rnn = nn.LSTM(input_size=input_size, hidden_size=hidden_size, num_layers=num_layers, bidirectional=True)
+        self.lstm = nn.LSTM(
+            input_size=self.input_size, hidden_size=self.hidden_size, num_layers=num_layers, bidirectional=bidirectional)
 
-        for p in range(self.p_layers):
-            self.add_module("pblstm"+str(p), 
-                nn.LSTM(input_size=4*hidden_size, hidden_size=hidden_size, num_layers=num_layers, bidirectional=True))
+        self.plstms = nn.ModuleList(
+                [nn.LSTM(input_size=4*self.hidden_size, hidden_size=self.hidden_size, num_layers=num_layers, bidirectional=bidirectional) 
+                            for i in range(self.p_layers)])
         #pBSLTM
 
-        if self.bidirectional == True:
-            self.linear_keys = nn.Linear(2*hidden_size, key_size) 
-            self.linear_values = nn.Linear(2*hidden_size, key_size)
+        if bidirectional == True:
+            self.linear_keys = nn.Linear(2*self.hidden_size, key_size) 
+            self.linear_values = nn.Linear(2*self.hidden_size, key_size)
         else:
-            self.linear_keys = nn.Linear(hidden_size, key_size) 
-            self.linear_values = nn.Linear(hidden_size, key_size)
+            self.linear_keys = nn.Linear(self.hidden_size, key_size) 
+            self.linear_values = nn.Linear(self.hidden_size, key_size)
+
 
     def _pool_packed(self, packed_output):
         #UNPACK
@@ -49,7 +50,7 @@ class EncoderRNN(nn.Module):
         #output = (L/2, B, 2*2H)
 
         lengths = lengths.data.numpy() // 2
-        
+
         #PACK
         output_packed = pack_padded_sequence(output, lengths)
         return output_packed
@@ -58,13 +59,12 @@ class EncoderRNN(nn.Module):
     def forward(self, input_variable, input_lengths):
         # input_variable (L, B, 40)
         packed_input = pack_padded_sequence(input_variable, input_lengths)
-        packed_output, hidden = self.rnn(packed_input)
+        packed_output, hidden = self.lstm(packed_input)
         # hidden = (num_layers*2, B, H)
 
         for p in range(self.p_layers):
-            layer_fn = getattr(self, "pblstm"+str(p))
             packed_output = self._pool_packed(packed_output)
-            packed_output, hidden = layer_fn(packed_output, hidden)
+            packed_output, hidden = self.plstms[p](packed_output, hidden)
 
         output, lengths = pad_packed_sequence(packed_output)
         lengths = lengths.data.numpy()
@@ -81,27 +81,29 @@ class EncoderRNN(nn.Module):
         else:
             assert(output.size(2) == self.hidden_size)
 
-        return lengths, keys, values
+        assert(output.size(0) == input_variable.size(0) // (2**self.p_layers))
+
+        return keys, values, lengths
 
 
 def _test():
-    input_len = 16
+    max_input_len = 40
     batch_size = 5
-    input_size = 10
-    input_variable = U.var(torch.randn(input_len, batch_size, input_size).float())
-    input_lengths = list(range(9, 8+batch_size+1))
+    input_size = 40
+    input_variable = U.var(torch.randn(max_input_len, batch_size, input_size).float())
+    input_lengths = [8, 16, 24, 32, 40]
 
-    hidden_size = 5
+    hidden_size = 100
     key_size = 10
     value_size = 10
     num_layers = 3
     bidirectional = True
-    p = 1
+    p_layers = 3
 
-    encoder = EncoderRNN(input_size, hidden_size, key_size, value_size, num_layers, bidirectional, p)
+    encoder = EncoderRNN(input_size, hidden_size, key_size, value_size, num_layers, bidirectional, p_layers)
     if U.is_cuda():
         encoder = encoder.cuda()
-    lengths, keys, values = encoder(input_variable, input_lengths[::-1])
+    keys, values, lengths = encoder(input_variable, input_lengths[::-1])
 
 
 if __name__ == "__main__":
