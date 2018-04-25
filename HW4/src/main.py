@@ -22,13 +22,13 @@ if __name__ == "__main__":
     train_dataloader = SpeechDataLoader(train_dataset, batch_size=batch_size)
 
     num_layers = 3
-    hidden_size = 256
+    hidden_size = 128
 
     input_size = 40
     key_size = 128
     value_size = 128
     bidirectional = True
-    p = 1
+    p = 3
 
     embedding_size = 128
 
@@ -42,7 +42,7 @@ if __name__ == "__main__":
         las = las.cuda()
 
     num_epochs = 15
-    lr = 0.01
+    lr = 0.0001
 
     trainer = Trainer()
     trainer.train(train_dataloader, las, lr, num_epochs)

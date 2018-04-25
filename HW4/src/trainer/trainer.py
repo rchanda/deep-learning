@@ -4,7 +4,7 @@ import constants as C
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
-
+import itertools
 
 class Trainer:
     def __init__(self):

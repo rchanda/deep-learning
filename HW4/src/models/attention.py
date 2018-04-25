@@ -7,14 +7,16 @@ import data.utils as U
 class Attention(nn.Module):
     def __init__(self, hidden_size, key_size, value_size, output_size):
         super(Attention, self).__init__()
+        self.hidden_size = hidden_size
         self.output_size = output_size
+        self.value_size = value_size 
 
         self.mask = None
         self.linear_query = nn.Linear(hidden_size, key_size)
 
-        combined_size = hidden_size+value_size
-        self.linear_out = nn.Linear(combined_size, self.output_size)
-
+        combined_size = self.hidden_size + self.value_size
+        self.mlp_layer = nn.Linear(combined_size, self.hidden_size)
+        self.projection = nn.Linear(self.hidden_size, self.output_size)
 
     def set_mask(self, mask):
         self.mask = mask
@@ -48,8 +50,10 @@ class Attention(nn.Module):
 
         combined = torch.cat((context, outputs), dim=2)
         # combined = (batch_size, 1, hidden_size+value_size)
-
-        output_softmax = F.log_softmax(self.linear_out(combined).view(batch_size, -1, self.output_size))
+	
+        mlp_out = self.mlp_layer(combined)
+        projection_out = self.projection(F.leaky_relu(mlp_out))
+        output_softmax = F.log_softmax(projection_out)
         # outputs = (batch_size, 1, output_size)
 
         return context, output_softmax
