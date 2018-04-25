@@ -1,6 +1,7 @@
 import data.utils as U
 import constants as C
 
+import numpy as np
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
@@ -10,7 +11,7 @@ class Trainer:
     def __init__(self):
         super(Trainer, self).__init__()
         
-    def _train_batch(self, model, input_variables, input_lengths, target_variables):
+    def _train_batch(self, model, input_variables, input_lengths, target_variables, target_lengths):
         batch_size = target_variables.size(0)
         
         decoder_outputs = model(input_variables, input_lengths, target_variables)
@@ -19,7 +20,8 @@ class Trainer:
         for (step, step_output) in enumerate(decoder_outputs):
             acc_loss += self.criterion(step_output.contiguous().view(batch_size, -1), target_variables[:, step + 1])
         
-        acc_loss /= batch_size
+        num_targets = np.sum(target_lengths)
+        acc_loss /= (batch_size*num_targets*1.0)
         
         self.optimizer.zero_grad()
         acc_loss.backward()
@@ -50,7 +52,7 @@ class Trainer:
 
                 input_variables = input_variables.transpose(0,1)
 
-                batch_loss = self._train_batch(model, input_variables, input_lengths, target_variables)
+                batch_loss = self._train_batch(model, input_variables, input_lengths, target_variables, target_lengths)
                 epoch_loss += batch_loss
                 
                 if batch_idx % 50 == 0:

@@ -48,7 +48,7 @@ class EncoderRNN(nn.Module):
         output = output.transpose(0,1)
         #output = (L/2, B, 2*2H)
 
-        lengths = np.asarray(lengths) // 2
+        lengths = lengths.data.numpy() // 2
         
         #PACK
         output_packed = pack_padded_sequence(output, lengths)
@@ -67,7 +67,8 @@ class EncoderRNN(nn.Module):
             packed_output, hidden = layer_fn(packed_output, hidden)
 
         output, lengths = pad_packed_sequence(packed_output)
-
+        lengths = lengths.data.numpy()
+        
         keys = self.linear_keys(output)
         # keys (L, B, K)
         values = self.linear_values(output)
