@@ -11,7 +11,7 @@ class Trainer:
     def __init__(self):
         super(Trainer, self).__init__()
         
-    def _train_batch(self, model, input_variables, input_lengths, target_variables, target_lengths):
+    def _train_batch(self, model, input_variables, input_lengths, target_variables):
         batch_size = target_variables.size(0)
         
         decoder_outputs = model(input_variables, input_lengths, target_variables)
@@ -20,23 +20,22 @@ class Trainer:
         for (step, step_output) in enumerate(decoder_outputs):
             acc_loss += self.criterion(step_output.contiguous().view(batch_size, -1), target_variables[:, step + 1])
         
-        num_targets = np.sum(target_lengths)
         acc_loss /= (batch_size*1.0)
         
         self.optimizer.zero_grad()
         acc_loss.backward()
 
         params = itertools.chain.from_iterable([group['params'] for group in self.optimizer.param_groups])
-        torch.nn.utils.clip_grad_norm(params, max_norm=self.max_grad_norm)
+        torch.nn.utils.clip_grad_norm_(params, max_norm=self.max_grad_norm)
         self.optimizer.step()
 
-        return acc_loss.data[0]
+        return acc_loss.data[0].item()
 
 
     def train(self, train_dataloader, model, lr, num_epochs):
         self.max_grad_norm = 5
         self.optimizer = torch.optim.Adam(model.parameters(), lr=lr)
-        self.criterion = nn.CrossEntropyLoss(ignore_index=C.PAD_TOKEN_IDX)
+        self.criterion = nn.CrossEntropyLoss(size_average=False, ignore_index=C.PAD_TOKEN_IDX)
         
         for epoch in range(num_epochs):
             model.train(True)
@@ -52,7 +51,7 @@ class Trainer:
 
                 input_variables = input_variables.transpose(0,1)
 
-                batch_loss = self._train_batch(model, input_variables, input_lengths, target_variables, target_lengths)
+                batch_loss = self._train_batch(model, input_variables, input_lengths, target_variables)
                 epoch_loss += batch_loss
                 
                 if batch_idx % 50 == 0:
