@@ -43,12 +43,12 @@ class EncoderRNN(nn.Module):
         
         if output.size(1)%2 != 0:
             output = output[:,:-1,:]
-        output = output.contiguous().view(output.size(0), output.size(1)/2, output.size(2)*2)
+        output = output.contiguous().view(output.size(0), output.size(1)//2, output.size(2)*2)
         #output = (B, L/2, 2*2H)
         output = output.transpose(0,1)
         #output = (L/2, B, 2*2H)
 
-        lengths = lengths / 2
+        lengths = np.asarray(lengths) // 2
         
         #PACK
         output_packed = pack_padded_sequence(output, lengths)
