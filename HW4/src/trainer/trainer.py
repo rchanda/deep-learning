@@ -23,12 +23,16 @@ class Trainer:
         
         self.optimizer.zero_grad()
         acc_loss.backward()
+
+        params = itertools.chain.from_iterable([group['params'] for group in self.optimizer.param_groups])
+        torch.nn.utils.clip_grad_norm(params, self.max_grad_norm)
         self.optimizer.step()
 
         return acc_loss.data[0]
 
 
     def train(self, train_dataloader, model, lr, num_epochs):
+        self.max_grad_norm = 5
         self.optimizer = torch.optim.Adam(model.parameters(), lr=lr)
         self.criterion = nn.NLLLoss(size_average=False, ignore_index=C.PAD_TOKEN_IDX)
         
