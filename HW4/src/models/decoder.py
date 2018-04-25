@@ -11,19 +11,20 @@ class DecoderRNN(nn.Module):
         super(DecoderRNN, self).__init__()
 
         self.num_layers = num_layers
+        self.hidden_size = hidden_size
         self.embedding = nn.Embedding(output_size, embedding_size)
 
         self.attention_combine = nn.Linear(value_size+embedding_size, hidden_size)
 
         self.params_h0 = nn.ParameterList(
-            [nn.Parameter(torch.FloatTensor(1, hidden_size)) for i in range(self.num_layers)])
+            [nn.Parameter(torch.FloatTensor(1, self.hidden_size)) for i in range(self.num_layers)])
         self.params_c0 = nn.ParameterList(
-            [nn.Parameter(torch.FloatTensor(1, hidden_size)) for i in range(self.num_layers)])
+            [nn.Parameter(torch.FloatTensor(1, self.hidden_size)) for i in range(self.num_layers)])
 
         self.lstmCells = nn.ModuleList(
-            [nn.LSTMCell(input_size=hidden_size, hidden_size=hidden_size) for i in range(self.num_layers)])
+            [nn.LSTMCell(input_size=self.hidden_size, hidden_size=self.hidden_size) for i in range(self.num_layers)])
 
-        self.attention = Attention(hidden_size, key_size, value_size, output_size)
+        self.attention = Attention(self.hidden_size, key_size, value_size, output_size)
 
 
     def forward_step(self, input_var, decoder_hiddens, context, encoder_keys, encoder_values):
@@ -88,7 +89,9 @@ class DecoderRNN(nn.Module):
     def _init_hidden_state(self, batch_size):
         hiddens = []
         for i in range(self.num_layers):
-            hidden = (self.params_h0[i].expand(batch_size, -1), self.params_c0[i].expand(batch_size, -1))
+            #hidden = (self.params_h0[i].expand(batch_size, -1), self.params_c0[i].expand(batch_size, -1))
+            hidden = (U.var(torch.zeros(batch_size, self.hidden_size)),
+                            U.var(torch.zeros(batch_size, self.hidden_size)))
             hiddens.append(hidden)
         return hiddens
 
