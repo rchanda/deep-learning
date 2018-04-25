@@ -16,7 +16,7 @@ class LAS(nn.Module):
 
 
 	def forward(self, input_variable, input_lengths, target_variable):
-		encoder_keys, encoder_values = self.encoder(input_variable, input_lengths)
+		input_lengths, encoder_keys, encoder_values = self.encoder(input_variable, input_lengths)
 		decoder_outputs = self.decoder(target_variable, encoder_keys, encoder_values, input_lengths, self.teacher_forcing_ratio)
 
 		return decoder_outputs
