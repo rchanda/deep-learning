@@ -21,7 +21,7 @@ class Trainer:
             acc_loss += self.criterion(step_output.contiguous().view(batch_size, -1), target_variables[:, step + 1])
         
         num_targets = np.sum(target_lengths)
-        acc_loss /= (batch_size*num_targets*1.0)
+        acc_loss /= (batch_size*1.0)
         
         self.optimizer.zero_grad()
         acc_loss.backward()

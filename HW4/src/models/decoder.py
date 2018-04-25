@@ -15,10 +15,9 @@ class DecoderRNN(nn.Module):
 
         self.attention_combine = nn.Linear(value_size+embedding_size, hidden_size)
 
-        self.h0 = nn.Parameter(torch.FloatTensor(1, hidden_size))
-        self.c0 = nn.Parameter(torch.FloatTensor(1, hidden_size))
-
         for i in range(self.num_layers):
+            self.add_module("h0"+str(i) , nn.Parameter(torch.FloatTensor(1, hidden_size)))
+            self.add_module("c0"+str(i) , nn.Parameter(torch.FloatTensor(1, hidden_size)))
             self.add_module("lstm"+str(i), nn.LSTMCell(input_size=hidden_size, hidden_size=hidden_size))
 
         self.attention = Attention(hidden_size, key_size, value_size, output_size)
@@ -87,7 +86,9 @@ class DecoderRNN(nn.Module):
     def _init_hidden_state(self, batch_size):
         hiddens = []
         for i in range(self.num_layers):
-            hidden = (self.h0.expand(batch_size, -1), self.c0.expand(batch_size, -1))
+            h0 = getattr(self, "h0"+str(i))
+            c0 = getattr(self, "c0"+str(i))
+            hidden = (h0.expand(batch_size, -1), c0.expand(batch_size, -1))
             hiddens.append(hidden)
         return hiddens
 
