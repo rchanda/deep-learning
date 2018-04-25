@@ -52,11 +52,10 @@ class Attention(nn.Module):
         # combined = (batch_size, 1, hidden_size+value_size)
 	
         mlp_out = self.mlp_layer(combined)
-        projection_out = self.projection(F.leaky_relu(mlp_out))
-        output_softmax = F.log_softmax(projection_out)
+        logits = self.projection(F.leaky_relu(mlp_out))
         # outputs = (batch_size, 1, output_size)
 
-        return context, output_softmax
+        return context, logits
 
 
 def _test():
