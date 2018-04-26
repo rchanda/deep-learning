@@ -31,10 +31,11 @@ class DecoderRNN(nn.Module):
             nn.LSTMCell(input_size=self.hidden_size, hidden_size=self.hidden_size)])
 
         self.attention = Attention(self.hidden_size, key_size, value_size, output_size)
+        self.attention.projection.weight = self.embedding.weight
 
 
     def forward_step(self, input_var, decoder_hiddens, context, encoder_keys, encoder_values):
-        #pdb.set_trace()
+        pdb.set_trace()
         # input_var = (batch_size)
         context = context.squeeze(1)
         # context = (batch_size, value_size)

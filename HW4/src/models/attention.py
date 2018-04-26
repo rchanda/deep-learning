@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 import data.utils as U
+import pdb
 
 class Attention(nn.Module):
     def __init__(self, hidden_size, key_size, value_size, output_size):
@@ -23,6 +24,7 @@ class Attention(nn.Module):
 
 
     def forward(self, outputs, encoder_keys, encoder_values):
+        pdb.set_trace()
         # outputs = (batch_size, 1, hidden_size)
         # encoder_keys = (input_len, batch_size, key_size)
         # encoder_values = (input_len, batch_size, value_size)
@@ -45,7 +47,7 @@ class Attention(nn.Module):
         context = torch.bmm(attention_weights, encoder_values)
         # context = (batch_size, 1, value_size)
 
-        combined = torch.cat((context, outputs), dim=2)
+        combined = torch.cat((outputs, context), dim=2)
         # combined = (batch_size, 1, hidden_size+value_size)
 	
         mlp_out = self.mlp_layer(combined)
