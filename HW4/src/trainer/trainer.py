@@ -18,7 +18,7 @@ class Trainer:
         acc_loss = 0.0
         
         for (step, step_output) in enumerate(decoder_outputs):
-            acc_loss += self.criterion(step_output.contiguous().view(batch_size, -1), target_variables[:, step + 1])
+            acc_loss += self.criterion(step_output, target_variables[:, step + 1])
         
         acc_loss /= (batch_size*1.0)
         

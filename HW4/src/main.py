@@ -27,7 +27,7 @@ if __name__ == "__main__":
     print("DataLoader Compeleted")
 
     num_layers = 3
-    hidden_size = 128
+    hidden_size = 256
 
     input_size = 40
     key_size = 128
@@ -45,7 +45,8 @@ if __name__ == "__main__":
 
     if U.is_cuda():
         las = las.cuda()
-
+    print(las)
+    
     num_epochs = 15
     lr = 0.001
 

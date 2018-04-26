@@ -15,8 +15,8 @@ class Attention(nn.Module):
         self.linear_query = nn.Linear(hidden_size, key_size)
 
         combined_size = self.hidden_size + self.value_size
-        self.mlp_layer = nn.Linear(combined_size, self.hidden_size)
-        self.projection = nn.Linear(self.hidden_size, self.output_size)
+        self.mlp_layer = nn.Linear(combined_size, key_size)
+        self.projection = nn.Linear(key_size, self.output_size)
 
     def set_mask(self, mask):
         self.mask = mask
@@ -37,11 +37,9 @@ class Attention(nn.Module):
         attention = torch.bmm(query, encoder_keys)
         # attention = (batch_size, 1, input_len)
         
-        
-        if self.mask is not None:
-            assert(self.mask.size(0) == batch_size)
-            assert(self.mask.size(2) == input_len)
-            attention.data.masked_fill_(self.mask, -float('inf'))
+        assert(self.mask.size(0) == batch_size)
+        assert(self.mask.size(2) == input_len)
+        attention.data.masked_fill_(self.mask, -float('inf'))
 
         attention_weights = F.softmax(attention.view(-1, input_len), dim=1).view(batch_size, -1, input_len)
         context = torch.bmm(attention_weights, encoder_values)
@@ -69,7 +67,9 @@ def _test():
     mask = U.create_mask(inputs_lens).unsqueeze(1)
 
     attention = Attention(hidden_size, key_size, value_size, output_size)
-    attention = attention.cuda()
+    if U.is_cuda():
+        attention = attention.cuda()
+
     attention.set_mask(mask)
 
     outputs = U.var(torch.randn(batch_size, 1, hidden_size))

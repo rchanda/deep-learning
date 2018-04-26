@@ -7,9 +7,8 @@ import data.utils as U
 class Lang:
 	def __init__(self):
 		self.item2index = {C.SOS_TOKEN: C.SOS_TOKEN_IDX, C.EOS_TOKEN : C.EOS_TOKEN_IDX}
-		self.index2item = {C.SOS_TOKEN_IDX : C.SOS_TOKEN, C.EOS_TOKEN_IDX : C.EOS_TOKEN, 
-								C.PAD_TOKEN_IDX : C.PAD_TOKEN, C.UNK_TOKEN_IDX : C.UNK_TOKEN}
-		self.num_items = 4
+		self.index2item = {C.SOS_TOKEN_IDX : C.SOS_TOKEN, C.EOS_TOKEN_IDX : C.EOS_TOKEN}
+		self.num_items = 2
 
 
 	def addItems(self, items):

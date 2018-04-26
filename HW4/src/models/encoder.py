@@ -36,19 +36,16 @@ class EncoderRNN(nn.Module):
     def _pool_packed(self, output):
         #UNPACK
         output, lengths = pad_packed_sequence(output)
-        print(output.shape)
-        #POOL
         
         if output.size(0)%2 != 0:
             output = output[:-1,:,:]
         
+        #POOL
         output = output.contiguous().view(output.size(0)//2, 2, output.size(1), output.size(2))
         #output = (L/2, 2, B, H)
         
         output = torch.mean(output, 1)
-        print(output.shape)
         lengths = np.asarray(lengths) // 2
-        print(output.shape)
 
         #PACK
         packed_output = pack_padded_sequence(output, lengths)
@@ -56,7 +53,7 @@ class EncoderRNN(nn.Module):
 
 
     def forward(self, input_variable, input_lengths):
-        pdb.set_trace()
+        #pdb.set_trace()
         # input_variable (L, B, 40)
         packed_input = pack_padded_sequence(input_variable, input_lengths)
         packed_output, _ = self.lstm(packed_input)

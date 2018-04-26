@@ -5,6 +5,9 @@ import constants as C
 import torch
 from torch.autograd import Variable
 
+import torch.nn.functional as F
+
+
 def getTranscriptsPath(mode):
     transcripts_path = (C.DATA_PATH+"%s_transcripts.npy") % (mode)
     return transcripts_path
@@ -17,7 +20,7 @@ def tokenizeTranscripts(mode):
     data = []
     for string in transcripts:
         #string = string.encode('utf-8')
-        string = re.sub(r"[^A-Z0-9 ,.']+", r" ", string)
+        #string = re.sub(r"[^A-Z0-9 ,.']+", r" ", string)
         data.append(list(string))
     data = np.asarray(data)
 
@@ -54,4 +57,20 @@ def var(tensor):
 def set_random_seeds(seed):
     np.random.seed(0)
     torch.manual_seed(42)
+
+
+if __name__ == "__main__":
+    lengths_array = [2,3,5]
+    mask = create_mask(lengths_array)
+
+    print(lengths_array, mask)
+
+    attention = var(torch.randn(3,5))
+    print(attention)
+    attention.data.masked_fill_(mask, -float('inf'))
+    print(attention)
+
+    print(F.softmax(attention, dim=1))
+
+
 

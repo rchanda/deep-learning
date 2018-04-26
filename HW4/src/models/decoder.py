@@ -7,6 +7,9 @@ from models.attention import Attention
 import data.utils as U
 import pdb
 
+np.random.seed(0)
+torch.manual_seed(42)
+
 class DecoderRNN(nn.Module):
     def __init__(self, output_size, embedding_size, hidden_size, key_size, value_size, num_layers):
         super(DecoderRNN, self).__init__()
@@ -17,10 +20,10 @@ class DecoderRNN(nn.Module):
 
         #self.attention_combine = nn.Linear(value_size+embedding_size, hidden_size)
 
-        self.params_h0 = nn.ParameterList(
-            [nn.Parameter(torch.FloatTensor(1, self.hidden_size)) for i in range(self.num_layers)])
-        self.params_c0 = nn.ParameterList(
-            [nn.Parameter(torch.FloatTensor(1, self.hidden_size)) for i in range(self.num_layers)])
+        #self.params_h0 = nn.ParameterList(
+        #   [nn.Parameter(torch.FloatTensor(1, self.hidden_size)) for i in range(self.num_layers)])
+        #self.params_c0 = nn.ParameterList(
+        #   [nn.Parameter(torch.FloatTensor(1, self.hidden_size)) for i in range(self.num_layers)])
 
         self.lstmCells = nn.ModuleList(
             [nn.LSTMCell(input_size=value_size+embedding_size, hidden_size=self.hidden_size),
@@ -31,16 +34,19 @@ class DecoderRNN(nn.Module):
 
 
     def forward_step(self, input_var, decoder_hiddens, context, encoder_keys, encoder_values):
-        # input_var = (batch_size, 1)
-        # context = (batch_size, 1, value_size)
-        embedding = self.embedding(input_var)
-        # embedding = (batch_size, 1, embedding_size)
-        decoder_input = torch.cat((embedding, context), dim=2)
-        # inputs = (batch_size, 1, embedding_size+value_size)
+        #pdb.set_trace()
+        # input_var = (batch_size)
+        context = context.squeeze(1)
+        # context = (batch_size, value_size)
 
-        #combined_input = self.attention_combine(decoder_input)
+        embedding = self.embedding(input_var)
+        # embedding = (batch_size, embedding_size)
+        decoder_input = torch.cat((embedding, context), dim=1)
+        # inputs = (batch_size, embedding_size+value_size)
+
+        # combined_input = self.attention_combine(decoder_input)
         # combined_input = (batch_size, 1, hidden_size)
-        hidden_state = decoder_input.squeeze(1)
+        hidden_state = decoder_input
 
         new_decoder_hiddens = []
         for i in range(self.num_layers):
@@ -55,7 +61,6 @@ class DecoderRNN(nn.Module):
 
 
     def forward(self, decoder_targets, encoder_keys, encoder_values, encoder_lens, teacher_forcing_ratio=1.0):
-        pdb.set_trace()
         # decoder_targets = (batch_size, max_target_len)
         batch_size = decoder_targets.size(0)
         max_target_len = decoder_targets.size(1)
@@ -63,22 +68,21 @@ class DecoderRNN(nn.Module):
         decoder_outputs = []
 
         decoder_hiddens = self._init_hidden_state(batch_size)
-        decoder_output = decoder_hiddens[self.num_layers-1][0].unsqueeze(1)
+        #decoder_output = decoder_hiddens[self.num_layers-1][0].unsqueeze(1)
         
         mask = U.create_mask(encoder_lens).unsqueeze(1)
         self.attention.set_mask(mask)
         #context, _ = self.attention(decoder_output, encoder_keys, encoder_values)
-        context = U.var(torch.zeros(batch_size, self.value_size))
+        context = U.var(torch.zeros(batch_size, 1, self.value_size))
 
         use_teacher_forcing = True 
         #if np.random.random() < teacher_forcing_ratio else False
 
         for timestamp in range(0, max_target_len-1): 
-            decoder_input = decoder_targets[:, timestamp].unsqueeze(1)
-            
-            decoder_output, decoder_hiddens, context = self.forward_step(decoder_input, decoder_hiddens, 
+            decoder_input = decoder_targets[:, timestamp]
+            # B x 1
+            step_output, decoder_hiddens, context = self.forward_step(decoder_input, decoder_hiddens, 
                                                             context, encoder_keys, encoder_values)
-            step_output = decoder_output.squeeze(1)
             #symbols = decode(step_output)
             decoder_outputs.append(step_output)
 
