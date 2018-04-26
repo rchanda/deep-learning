@@ -14,7 +14,7 @@ class DecoderRNN(nn.Module):
         self.hidden_size = hidden_size
         self.embedding = nn.Embedding(output_size, embedding_size)
 
-        self.attention_combine = nn.Linear(value_size+embedding_size, hidden_size)
+        #self.attention_combine = nn.Linear(value_size+embedding_size, hidden_size)
 
         self.params_h0 = nn.ParameterList(
             [nn.Parameter(torch.FloatTensor(1, self.hidden_size)) for i in range(self.num_layers)])
@@ -22,7 +22,9 @@ class DecoderRNN(nn.Module):
             [nn.Parameter(torch.FloatTensor(1, self.hidden_size)) for i in range(self.num_layers)])
 
         self.lstmCells = nn.ModuleList(
-            [nn.LSTMCell(input_size=self.hidden_size, hidden_size=self.hidden_size) for i in range(self.num_layers)])
+            [nn.LSTMCell(input_size=value_size+embedding_size, hidden_size=self.hidden_size),
+            nn.LSTMCell(input_size=self.hidden_size, hidden_size=self.hidden_size),
+            nn.LSTMCell(input_size=self.hidden_size, hidden_size=self.hidden_size)])
 
         self.attention = Attention(self.hidden_size, key_size, value_size, output_size)
 
@@ -35,9 +37,9 @@ class DecoderRNN(nn.Module):
         decoder_input = torch.cat((embedding, context), dim=2)
         # inputs = (batch_size, 1, embedding_size+value_size)
 
-        combined_input = self.attention_combine(decoder_input)
+        #combined_input = self.attention_combine(decoder_input)
         # combined_input = (batch_size, 1, hidden_size)
-        hidden_state = combined_input.squeeze(1)
+        hidden_state = decoder_input.squeeze(1)
 
         new_decoder_hiddens = []
         for i in range(self.num_layers):
