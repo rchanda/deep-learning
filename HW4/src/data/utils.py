@@ -50,3 +50,8 @@ def var(tensor):
         return Variable(tensor).cuda()
     else:
         return Variable(tensor)
+
+def set_random_seeds(seed):
+    np.random.seed(0)
+    torch.manual_seed(42)
+

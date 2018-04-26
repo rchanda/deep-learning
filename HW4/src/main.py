@@ -12,14 +12,19 @@ from models.las import LAS
 from trainer.trainer import Trainer
 
 if __name__ == "__main__":
+    U.set_random_seeds(1)
+
     lang = Lang()
     trans = U.tokenizeTranscripts('train') #train
     lang.init_lang(trans)
     output_size = lang.num_items
 
     batch_size = 32
+    print("Starting .. ..")
     train_dataset = SpeechDataset(lang, 'train')
+    print("Dataset Loading Completed")
     train_dataloader = SpeechDataLoader(train_dataset, batch_size=batch_size)
+    print("DataLoader Compeleted")
 
     num_layers = 3
     hidden_size = 128

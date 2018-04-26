@@ -14,7 +14,7 @@ class SpeechDataLoader():
 		num_workers = 4
 		pin_memory = True
 
-		self.dataloader = DataLoader(dataset, shuffle=True, batch_size=batch_size,
+		self.dataloader = DataLoader(dataset, shuffle=False, batch_size=batch_size,
 			collate_fn=collate_fn, num_workers=num_workers, pin_memory=pin_memory)
 
 
