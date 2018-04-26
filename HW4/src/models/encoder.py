@@ -18,10 +18,10 @@ class EncoderRNN(nn.Module):
         self.p_layers = p_layers
 
         self.lstm = nn.LSTM(
-            input_size=self.input_size, hidden_size=self.hidden_size, num_layers=num_layers, bidirectional=bidirectional)
+            input_size=self.input_size, hidden_size=self.hidden_size, bidirectional=bidirectional)
 
         self.plstms = nn.ModuleList(
-                [nn.LSTM(input_size=2*self.hidden_size, hidden_size=self.hidden_size, num_layers=num_layers, bidirectional=bidirectional) 
+                [nn.LSTM(input_size=2*self.hidden_size, hidden_size=self.hidden_size, bidirectional=bidirectional) 
                             for i in range(self.p_layers)])
         #pBSLTM
 
@@ -59,11 +59,11 @@ class EncoderRNN(nn.Module):
         pdb.set_trace()
         # input_variable (L, B, 40)
         packed_input = pack_padded_sequence(input_variable, input_lengths)
-        packed_output, hidden = self.lstm(packed_input)
+        packed_output, _ = self.lstm(packed_input)
         # hidden = (num_layers*2, B, H)
 
         for p in range(self.p_layers):
-            packed_output, hidden = self.plstms[p](packed_output, hidden)
+            packed_output, _ = self.plstms[p](packed_output)
             packed_output = self._pool_packed(packed_output)
 
         output, lengths = pad_packed_sequence(packed_output)

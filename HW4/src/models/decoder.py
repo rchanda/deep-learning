@@ -10,7 +10,7 @@ import pdb
 class DecoderRNN(nn.Module):
     def __init__(self, output_size, embedding_size, hidden_size, key_size, value_size, num_layers):
         super(DecoderRNN, self).__init__()
-
+        self.value_size = value_size
         self.num_layers = num_layers
         self.hidden_size = hidden_size
         self.embedding = nn.Embedding(output_size, embedding_size)
@@ -67,8 +67,9 @@ class DecoderRNN(nn.Module):
         
         mask = U.create_mask(encoder_lens).unsqueeze(1)
         self.attention.set_mask(mask)
-        context, _ = self.attention(decoder_output, encoder_keys, encoder_values)
-        
+        #context, _ = self.attention(decoder_output, encoder_keys, encoder_values)
+        context = U.var(torch.zeros(batch_size, self.value_size))
+
         use_teacher_forcing = True 
         #if np.random.random() < teacher_forcing_ratio else False
 
