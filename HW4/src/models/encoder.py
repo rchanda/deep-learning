@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
-
+import pdb
 class EncoderRNN(nn.Module):
     def __init__(self, input_size, hidden_size, key_size, value_size, num_layers, bidirectional, p_layers):
         super(EncoderRNN, self).__init__()
@@ -21,7 +21,7 @@ class EncoderRNN(nn.Module):
             input_size=self.input_size, hidden_size=self.hidden_size, num_layers=num_layers, bidirectional=bidirectional)
 
         self.plstms = nn.ModuleList(
-                [nn.LSTM(input_size=4*self.hidden_size, hidden_size=self.hidden_size, num_layers=num_layers, bidirectional=bidirectional) 
+                [nn.LSTM(input_size=2*self.hidden_size, hidden_size=self.hidden_size, num_layers=num_layers, bidirectional=bidirectional) 
                             for i in range(self.p_layers)])
         #pBSLTM
 
@@ -33,41 +33,41 @@ class EncoderRNN(nn.Module):
             self.linear_values = nn.Linear(self.hidden_size, key_size)
 
 
-    def _pool_packed(self, packed_output):
+    def _pool_packed(self, output):
         #UNPACK
-        output, lengths = pad_packed_sequence(packed_output)
-        # output = (L, B, 2H)
-
+        output, lengths = pad_packed_sequence(output)
+        print(output.shape)
         #POOL
-        output = output.transpose(1,0) 
-        # output = (B, L, 2H)
         
-        if output.size(1)%2 != 0:
-            output = output[:,:-1,:]
-        output = output.contiguous().view(output.size(0), output.size(1)//2, output.size(2)*2)
-        #output = (B, L/2, 2*2H)
-        output = output.transpose(0,1)
-        #output = (L/2, B, 2*2H)
-
-        lengths = lengths.data.numpy() // 2
+        if output.size(0)%2 != 0:
+            output = output[:-1,:,:]
+        
+        output = output.contiguous().view(output.size(0)//2, 2, output.size(1), output.size(2))
+        #output = (L/2, 2, B, H)
+        
+        output = torch.mean(output, 1)
+        print(output.shape)
+        lengths = np.asarray(lengths) // 2
+        print(output.shape)
 
         #PACK
-        output_packed = pack_padded_sequence(output, lengths)
-        return output_packed
+        packed_output = pack_padded_sequence(output, lengths)
+        return packed_output
 
 
     def forward(self, input_variable, input_lengths):
+        pdb.set_trace()
         # input_variable (L, B, 40)
         packed_input = pack_padded_sequence(input_variable, input_lengths)
         packed_output, hidden = self.lstm(packed_input)
         # hidden = (num_layers*2, B, H)
 
         for p in range(self.p_layers):
-            packed_output = self._pool_packed(packed_output)
             packed_output, hidden = self.plstms[p](packed_output, hidden)
+            packed_output = self._pool_packed(packed_output)
 
         output, lengths = pad_packed_sequence(packed_output)
-        lengths = lengths.data.numpy()
+        lengths = np.asarray(lengths)
         
         keys = self.linear_keys(output)
         # keys (L, B, K)
@@ -89,7 +89,7 @@ class EncoderRNN(nn.Module):
 def _test():
     max_input_len = 40
     batch_size = 5
-    input_size = 40
+    input_size = 200
     input_variable = U.var(torch.randn(max_input_len, batch_size, input_size).float())
     input_lengths = [8, 16, 24, 32, 40]
 

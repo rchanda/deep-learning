@@ -5,6 +5,7 @@ import torch.nn as nn
 
 from models.attention import Attention
 import data.utils as U
+import pdb
 
 class DecoderRNN(nn.Module):
     def __init__(self, output_size, embedding_size, hidden_size, key_size, value_size, num_layers):
@@ -54,6 +55,7 @@ class DecoderRNN(nn.Module):
 
 
     def forward(self, decoder_targets, encoder_keys, encoder_values, encoder_lens, teacher_forcing_ratio=1.0):
+        pdb.set_trace()
         # decoder_targets = (batch_size, max_target_len)
         batch_size = decoder_targets.size(0)
         max_target_len = decoder_targets.size(1)
