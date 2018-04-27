@@ -16,8 +16,6 @@ class Trainer:
         self.evaluator = Evaluator(criterion)
 
     def _train_batch(self, model, input_variables, input_lengths, target_variables):
-        batch_size = target_variables.size(0)
-        
         decoder_outputs, ret_dict = model(input_variables, input_lengths, target_variables)
         acc_loss = self.criterion(decoder_outputs.contiguous(), target_variables.contiguous())
         acc_loss = acc_loss.view(target_variables.size(0), target_variables.size(1))

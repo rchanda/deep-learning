@@ -54,8 +54,8 @@ class DecoderRNN(nn.Module):
         ret_dict = dict()
 
         # decoder_targets = (batch_size, max_target_len)
-        batch_size = decoder_targets.size(0)
-        max_target_len = decoder_targets.size(1) if decoder_targets.size(1) > 1 else self.max_len
+        batch_size = decoder_targets.size(1)
+        max_target_len = decoder_targets.size(0) if decoder_targets.size(0) > 1 else self.max_len
 
         decoder_hiddens = self._init_hidden_state(batch_size)
         #decoder_output = decoder_hiddens[self.num_layers-1][0].unsqueeze(1)
@@ -81,7 +81,7 @@ class DecoderRNN(nn.Module):
             return symbols
 
 
-        decoder_input = decoder_targets[:, 0]
+        decoder_input = decoder_targets[0, :]
         # B x 1
 
         for timestamp in range(1, max_target_len): 
@@ -90,7 +90,7 @@ class DecoderRNN(nn.Module):
             decoder_outputs.append(step_output)
 
             if use_teacher_forcing:
-                decoder_input = decoder_targets[:, timestamp]
+                decoder_input = decoder_targets[timestamp, :]
             else:
                 symbols = decode(timestamp, step_output)
                 decoder_input = symbols.squeeze(1)
@@ -125,7 +125,7 @@ def _test():
     num_layers = 3
     teacher_forcing_ratio = 1.0
 
-    decoder_targets = U.var(torch.ones(batch_size, max_target_len).long())
+    decoder_targets = U.var(torch.ones(max_target_len, batch_size).long())
 
     outputs = U.var(torch.randn(batch_size, 1, hidden_size))
     encoder_lens = list(range(1, batch_size+1))

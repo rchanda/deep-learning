@@ -55,6 +55,8 @@ class Predictor:
             target_variables = U.var(torch.from_numpy(target_variables).long())
 
             input_variables = input_variables.transpose(0,1)
+            target_variables = target_variables.transpose(0,1)
+
             batch_size = target_variables.size(0)
 
             self.model.teacher_forcing_ratio = 0.0
@@ -64,9 +66,11 @@ class Predictor:
             target_lengths = ret_dict['length']
             target_sequences = torch.stack(ret_dict['sequence'])
             # T X B X 1
-
+            target_sequences = target_sequences.squeeze(2)
+            
             self.model.teacher_forcing_ratio = 1.0
             decoder_outputs, ret_dict = self.model(input_variables, input_lengths, target_sequences)
+
             acc_loss = self.criterion(decoder_outputs.contiguous(), target_variables.contiguous())
             acc_loss = acc_loss.view(target_variables.size(0), target_variables.size(1))
             acc_loss = acc_loss.sum(0)
