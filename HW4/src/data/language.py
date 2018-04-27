@@ -33,7 +33,8 @@ class Lang:
 	def indices2items(self, indices):
 		items = []
 		for index in indices:
-			items.append(self.index2item[index])
+			if index not in {C.SOS_TOKEN_IDX, C.EOS_TOKEN_IDX}:
+				items.append(self.index2item[index])
 		items = np.asarray(items)
 		return items
 

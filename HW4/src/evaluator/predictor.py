@@ -1,4 +1,5 @@
 import data.utils as U
+import constants as C
 
 import numpy as np
 import torch
@@ -14,11 +15,30 @@ from models.encoder import EncoderRNN
 from models.decoder import DecoderRNN
 from models.las import LAS
 
+from loss.loss import CrossEntropyLoss3D
+
+
+
 class Predictor:
-    def __init__(self, model, lang):
+    def __init__(self, model, lang, criterion):
         super(Predictor, self).__init__()
         self.model = model
         self.lang = lang
+        self.criterion = criterion
+
+
+    def dump_target_sequences(self, sequences, lengths, outFile, batch_idx):
+        batch_size = len(lengths)
+        step = batch_size*batch_idx
+
+        for i in range(batch_size):
+            length = lengths[i]
+
+            tgt_id_seq = [sequences[di,i,0].item() for di in range(length)]
+            tgt_seq = self.lang.indices2items(tgt_id_seq)
+            outFile.write("%d,%s\n" % (step, ''.join(tgt_seq)))
+            step += 1
+
 
 
     def predict(self, test_dataloader, outFile):
@@ -35,19 +55,28 @@ class Predictor:
             target_variables = U.var(torch.from_numpy(target_variables).long())
 
             input_variables = input_variables.transpose(0,1)
-
             batch_size = target_variables.size(0)
+
+            self.model.teacher_forcing_ratio = 0.0
             decoder_outputs, ret_dict = self.model(input_variables, input_lengths, target_variables)
+            # T X B X O
 
-            for i in range(batch_size):
-                length = ret_dict['length'][i]-1
+            target_lengths = ret_dict['length']
+            target_sequences = torch.stack(ret_dict['sequence'])
+            # T X B X 1
 
-                tgt_id_seq = [ret_dict['sequence'][di][i].item() for di in range(length)]
-                tgt_seq = self.lang.indices2items(tgt_id_seq)
-                outFile.write("%d,%s\n" % (step, ''.join(tgt_seq)))
-                step += 1
+            self.model.teacher_forcing_ratio = 1.0
+            decoder_outputs, ret_dict = self.model(input_variables, input_lengths, target_sequences)
+            acc_loss = self.criterion(decoder_outputs.contiguous(), target_variables.contiguous())
+            acc_loss = acc_loss.view(target_variables.size(0), target_variables.size(1))
+            acc_loss = acc_loss.sum(0)
+
+            print(acc_loss)
+            self.dump_target_sequences(target_sequences, target_lengths, outFile, batch_idx)
 
             print("%d Batch Prediction Completed" % (batch_idx))
+
+        outFile.close()
 
 
 def _test():
@@ -81,7 +110,6 @@ def _test():
 
     model = torch.load('../data/saved_models_0.001/6model.pt', map_location=lambda storage, loc: storage)
     las.load_state_dict(model.state_dict())
-    las.teacher_forcing_ratio = 0.0
 
     #las = torch.load('../data/saved_models_0.0001/7model.pt', map_location=lambda storage, loc: storage)
     #las.teacher_forcing_ratio = 0.0
@@ -94,7 +122,8 @@ def _test():
     test_dataset = SpeechDataset(lang, 'test')
     test_dataloader = SpeechDataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
-    predictor = Predictor(las, lang)
+    criterion = CrossEntropyLoss3D(reduce=False, ignore_index=C.PAD_TOKEN_IDX)
+    predictor = Predictor(las, lang, criterion)
     
     outFile = open('predictions.txt', 'w')
     predictor.predict(test_dataloader, outFile)

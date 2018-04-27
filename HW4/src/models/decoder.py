@@ -67,7 +67,7 @@ class DecoderRNN(nn.Module):
         use_teacher_forcing = True if np.random.random() < teacher_forcing_ratio else False
 
         decoder_outputs = []
-        sequence_symbols = []
+        sequence_symbols = [U.var(torch.zeros(batch_size, 1).fill_(C.SOS_TOKEN_IDX).long())]
         lengths = np.array([max_target_len] * batch_size)
 
         def decode(step, step_output):
@@ -97,6 +97,7 @@ class DecoderRNN(nn.Module):
 
         ret_dict[C.KEY_SEQUENCE] = sequence_symbols
         ret_dict[C.KEY_LENGTH] = lengths.tolist()
+        decoder_outputs = torch.stack(decoder_outputs)
 
         return decoder_outputs, ret_dict
 

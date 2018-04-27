@@ -19,12 +19,9 @@ class Trainer:
         batch_size = target_variables.size(0)
         
         decoder_outputs, ret_dict = model(input_variables, input_lengths, target_variables)
-        acc_loss = 0.0
-        #pdb.set_trace()
-        for (step, step_output) in enumerate(decoder_outputs):
-            acc_loss += self.criterion(step_output, target_variables[:, step + 1])
-        
-        acc_loss /= (batch_size*1.0)
+        acc_loss = self.criterion(decoder_outputs.contiguous(), target_variables.contiguous())
+        acc_loss = acc_loss.view(target_variables.size(0), target_variables.size(1))
+        acc_loss = acc_loss.sum(0).mean()
         
         self.optimizer.zero_grad()
         acc_loss.backward()
@@ -53,6 +50,7 @@ class Trainer:
                 target_variables = U.var(torch.from_numpy(target_variables).long())
 
                 input_variables = input_variables.transpose(0,1)
+                target_variables = target_variables.transpose(0,1)
 
                 batch_loss = self._train_batch(model, input_variables, input_lengths, target_variables)
                 epoch_loss += batch_loss

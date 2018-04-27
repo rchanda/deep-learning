@@ -50,7 +50,7 @@ def _test():
 	decoder = DecoderRNN(output_size, embedding_size, hidden_size, key_size, value_size, num_layers)
 
 	las = LAS(encoder, decoder, teacher_forcing_ratio)
-	decoder_outputs = las(input_variable, input_lengths, target_variable)
+	decoder_outputs, ret_dict = las(input_variable, input_lengths, target_variable)
 
     
 if __name__ == "__main__":

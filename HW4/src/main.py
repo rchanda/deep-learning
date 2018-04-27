@@ -10,6 +10,7 @@ from models.decoder import DecoderRNN
 from models.las import LAS
 
 from trainer.trainer import Trainer
+from loss.loss import CrossEntropyLoss3D
 import torch.nn as nn
 
 if __name__ == "__main__":
@@ -45,6 +46,7 @@ if __name__ == "__main__":
 
     teacher_forcing_ratio = 1.0
     las = LAS(encoder, decoder, teacher_forcing_ratio)
+    print(las)
 
     if U.use_cuda():
         las = las.cuda()
@@ -52,6 +54,6 @@ if __name__ == "__main__":
     num_epochs = 15
     lr = 0.001
 
-    criterion = nn.CrossEntropyLoss(size_average=False, ignore_index=C.PAD_TOKEN_IDX)
+    criterion = CrossEntropyLoss3D(reduce=False, ignore_index=C.PAD_TOKEN_IDX)
     trainer = Trainer(criterion)
     trainer.train(train_dataloader, dev_dataloader, las, lr, num_epochs)
