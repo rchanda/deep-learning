@@ -25,6 +25,7 @@ class Predictor:
         self.model = model
         self.lang = lang
         self.criterion = criterion
+        self.num_random_samples = 1
 
 
     def dump_target_sequences(self, sequences, lengths, outFile, batch_idx):
@@ -58,25 +59,37 @@ class Predictor:
             target_variables = target_variables.transpose(0,1)
             # T X O
 
-            batch_size = target_variables.size(0)
+            batch_size = target_variables.size(1)
+            max_len = self.model.decoder.max_len
 
-            self.model.teacher_forcing_ratio = 0.0
-            decoder_outputs, ret_dict = self.model(input_variables, input_lengths, target_variables)
-            # T X B X O
+            target_sequence_min_loss = [-1.0] * batch_size
+            target_sequences_final = U.var(torch.zeros(max_len, batch_size))
+            target_lengths_final = [0] * batch_size
 
-            target_lengths = ret_dict['length']
-            target_sequences = torch.stack(ret_dict['sequence'])
-            # T X B X 1
-            target_sequences = target_sequences.squeeze(2)
+            for r in range(self.num_random_samples):
+                self.model.teacher_forcing_ratio = 0.0
+                decoder_outputs, ret_dict = self.model(input_variables, input_lengths, target_variables)
+                # T X B X O
+
+                target_lengths = ret_dict['length']
+                target_sequences = torch.stack(ret_dict['sequence'])
+                # T X B X 1
+                target_sequences = target_sequences.squeeze(2)
+                
+                self.model.teacher_forcing_ratio = 1.0
+                decoder_outputs, ret_dict = self.model(input_variables, input_lengths, target_sequences)
+                
+                acc_loss = self.criterion(decoder_outputs.contiguous(), target_sequences[1:,:].contiguous())
+                acc_loss = acc_loss.view(target_sequences.size(0)-1, target_sequences.size(1))
+                acc_loss = acc_loss.sum(0)/target_sequences.size(1)
             
-            self.model.teacher_forcing_ratio = 1.0
-            decoder_outputs, ret_dict = self.model(input_variables, input_lengths, target_sequences)
-            
-            acc_loss = self.criterion(decoder_outputs.contiguous(), target_sequences[1:,:].contiguous())
-            acc_loss = acc_loss.view(target_sequences.size(0)-1, target_sequences.size(1))
-            acc_loss = acc_loss.sum(0)
-            
-            self.dump_target_sequences(target_sequences, target_lengths, outFile, batch_idx)
+                for b in batch_size:
+                    if acc_loss[b] < target_sequence_min_loss[b]:
+                        target_sequences_final[:,b] = target_sequences[:,b]
+                        target_lengths_final[b] = target_lengths[b]
+
+
+            self.dump_target_sequences(target_sequences_final, target_lengths, outFile, batch_idx)
 
             print("%d Batch Prediction Completed" % (batch_idx))
 
@@ -112,7 +125,7 @@ def _test():
     teacher_forcing_ratio = 1.0
     las = LAS(encoder, decoder, teacher_forcing_ratio)
 
-    model = torch.load('saved_models/4model.pt', map_location=lambda storage, loc: storage)
+    model = torch.load('../data/saved_models/4model.pt', map_location=lambda storage, loc: storage)
     las.load_state_dict(model.state_dict())
 
     #las = torch.load('../data/saved_models_0.0001/7model.pt', map_location=lambda storage, loc: storage)

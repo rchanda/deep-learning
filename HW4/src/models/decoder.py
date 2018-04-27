@@ -7,6 +7,8 @@ from models.attention import Attention
 import data.utils as U
 import constants as C
 import pdb
+import torch.nn.functional as F
+
 
 class DecoderRNN(nn.Module):
     def __init__(self, output_size, embedding_size, hidden_size, key_size, value_size, num_layers, max_len):
@@ -71,7 +73,7 @@ class DecoderRNN(nn.Module):
         lengths = np.array([max_target_len] * batch_size)
 
         def decode(step, step_output):
-            symbols = decoder_outputs[-1].topk(1)[1]
+            symbols = F.softmax(decoder_outputs[-1], dim=1).multinomial(1)
             sequence_symbols.append(symbols)
             eos_batches = symbols.data.eq(C.EOS_TOKEN_IDX)
             if eos_batches.dim() > 0:
