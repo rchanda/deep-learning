@@ -72,7 +72,7 @@ class Predictor:
             decoder_outputs, ret_dict = self.model(input_variables, input_lengths, target_sequences)
 
             acc_loss = self.criterion(decoder_outputs.contiguous(), target_sequences[1:,:].contiguous())
-            acc_loss = acc_loss.view(target_variables.size(0), target_sequences.size(1))
+            acc_loss = acc_loss.view(target_variables.size(0)-1, target_sequences.size(1))
             acc_loss = acc_loss.sum(0)
 
             print(acc_loss)
