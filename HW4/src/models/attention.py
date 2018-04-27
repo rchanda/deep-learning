@@ -24,10 +24,12 @@ class Attention(nn.Module):
 
 
     def forward(self, outputs, encoder_keys, encoder_values):
-        #pdb.set_trace()
-        # outputs = (batch_size, 1, hidden_size)
         # encoder_keys = (input_len, batch_size, key_size)
         # encoder_values = (input_len, batch_size, value_size)
+
+        outputs = outputs.unsqueeze(1)
+        # outputs = (batch_size, 1, hidden_size)
+        
         input_len = encoder_keys.size(0)
         batch_size = encoder_keys.size(1)
 
@@ -49,10 +51,15 @@ class Attention(nn.Module):
 
         combined = torch.cat((outputs, context), dim=2)
         # combined = (batch_size, 1, hidden_size+value_size)
-	
+
         mlp_out = self.mlp_layer(combined)
         logits = self.projection(F.leaky_relu(mlp_out))
-        # outputs = (batch_size, 1, output_size)
+
+        logits = logits.squeeze(1)
+        # outputs = (batch_size, output_size)
+
+        context = context.squeeze(1)
+        # context = (batch_size, value_size)
 
         return context, logits
 

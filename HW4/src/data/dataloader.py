@@ -10,11 +10,11 @@ from data.dataset import SpeechDataset
 
 class SpeechDataLoader():
 
-	def __init__(self, dataset, batch_size):
+	def __init__(self, dataset, batch_size, shuffle):
 		num_workers = 4
 		pin_memory = True
 
-		self.dataloader = DataLoader(dataset, shuffle=True, batch_size=batch_size,
+		self.dataloader = DataLoader(dataset, shuffle=shuffle, batch_size=batch_size,
 			collate_fn=collate_fn, num_workers=num_workers, pin_memory=pin_memory)
 		print("DataLoader Loading Completed")
 

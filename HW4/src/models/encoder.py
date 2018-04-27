@@ -53,7 +53,6 @@ class EncoderRNN(nn.Module):
 
 
     def forward(self, input_variable, input_lengths):
-        #pdb.set_trace()
         # input_variable (L, B, 40)
         packed_input = pack_padded_sequence(input_variable, input_lengths)
         packed_output, _ = self.lstm(packed_input)
