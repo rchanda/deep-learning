@@ -71,7 +71,7 @@ class Predictor:
             self.model.teacher_forcing_ratio = 1.0
             decoder_outputs, ret_dict = self.model(input_variables, input_lengths, target_sequences)
 
-            acc_loss = self.criterion(decoder_outputs.contiguous(), target_sequences[:,1:].contiguous())
+            acc_loss = self.criterion(decoder_outputs.contiguous(), target_sequences[1:,:].contiguous())
             acc_loss = acc_loss.view(target_variables.size(0), target_sequences.size(1))
             acc_loss = acc_loss.sum(0)
 

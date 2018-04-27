@@ -17,7 +17,7 @@ class Trainer:
 
     def _train_batch(self, model, input_variables, input_lengths, target_variables):
         decoder_outputs, ret_dict = model(input_variables, input_lengths, target_variables)
-        acc_loss = self.criterion(decoder_outputs.contiguous(), target_variables[:,1:].contiguous())
+        acc_loss = self.criterion(decoder_outputs.contiguous(), target_variables[1:,:].contiguous())
         acc_loss = acc_loss.view(target_variables.size(0), target_variables.size(1))
         acc_loss = acc_loss.sum(0).mean()
         
