@@ -12,5 +12,7 @@ PAD_TOKEN_IDX = 3
 
 TRAINER_STATE_NAME = 'trainer_states.pt'
 MODEL_NAME = 'model.pt'
-
+KEY_SEQUENCE = 'sequence'
+KEY_LENGTH = 'length'
+ 
 DEBUG = True

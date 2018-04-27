@@ -22,14 +22,11 @@ if __name__ == "__main__":
 
     batch_size = 32
     print("Starting .. ..")
-    train_dataset = SpeechDataset(lang, 'train') # TODO - Change to train
+    train_dataset = SpeechDataset(lang, 'dev') # TODO - Change to train
     train_dataloader = SpeechDataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 
     dev_dataset = SpeechDataset(lang, 'dev')
     dev_dataloader = SpeechDataLoader(dev_dataset, batch_size=batch_size, shuffle=True)
-
-    test_dataset = SpeechDataset(lang, 'train')
-    test_dataloader = SpeechDataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
     num_layers = 3
     hidden_size = 256

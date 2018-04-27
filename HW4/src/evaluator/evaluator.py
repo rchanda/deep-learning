@@ -10,7 +10,7 @@ class Evaluator():
 	def _eval_batch(self, model, input_variables, input_lengths, target_variables):
 		batch_size = target_variables.size(0)
 
-		decoder_outputs = model(input_variables, input_lengths, target_variables)
+		decoder_outputs, ret_dict = model(input_variables, input_lengths, target_variables)
 		acc_loss = 0.0
 
 		for (step, step_output) in enumerate(decoder_outputs):

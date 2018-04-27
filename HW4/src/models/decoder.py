@@ -5,7 +5,8 @@ import torch.nn as nn
 
 from models.attention import Attention
 import data.utils as U
-
+import constants as C
+import pdb
 
 class DecoderRNN(nn.Module):
     def __init__(self, output_size, embedding_size, hidden_size, key_size, value_size, num_layers, max_len):
@@ -35,7 +36,7 @@ class DecoderRNN(nn.Module):
         
         embedding = self.embedding(input_var)
         # embedding = (batch_size, embedding_size)
-        
+        #pdb.set_trace()
         hidden_state = torch.cat((embedding, context), dim=1)
         # hidden_state = (batch_size, embedding_size+value_size)
 
@@ -63,7 +64,7 @@ class DecoderRNN(nn.Module):
         self.attention.set_mask(mask)
 
         context = U.var(torch.zeros(batch_size, self.value_size).float())
-
+        print(teacher_forcing_ratio)
         use_teacher_forcing = True if np.random.random() < teacher_forcing_ratio else False
 
         decoder_outputs = []
@@ -93,10 +94,10 @@ class DecoderRNN(nn.Module):
                 decoder_input = decoder_targets[:, timestamp]
             else:
                 symbols = decode(timestamp, step_output)
-                decoder_input = symbols
+                decoder_input = symbols.squeeze(1)
 
-        ret_dict[DecoderRNN.KEY_SEQUENCE] = sequence_symbols
-        ret_dict[DecoderRNN.KEY_LENGTH] = lengths.tolist()
+        ret_dict[C.KEY_SEQUENCE] = sequence_symbols
+        ret_dict[C.KEY_LENGTH] = lengths.tolist()
 
         return decoder_outputs, ret_dict
 

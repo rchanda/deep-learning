@@ -7,6 +7,7 @@ from torch.autograd import Variable
 import itertools
 
 from evaluator.evaluator import Evaluator
+import pdb
 
 class Trainer:
     def __init__(self, criterion):
@@ -17,9 +18,9 @@ class Trainer:
     def _train_batch(self, model, input_variables, input_lengths, target_variables):
         batch_size = target_variables.size(0)
         
-        decoder_outputs = model(input_variables, input_lengths, target_variables)
+        decoder_outputs, ret_dict = model(input_variables, input_lengths, target_variables)
         acc_loss = 0.0
-        
+        #pdb.set_trace()
         for (step, step_output) in enumerate(decoder_outputs):
             acc_loss += self.criterion(step_output, target_variables[:, step + 1])
         

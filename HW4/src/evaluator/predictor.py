@@ -44,8 +44,11 @@ def _test():
     test_dataloader = SpeechDataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
 
-    las = torch.load('../data/saved_models/8model.pt', map_location=lambda storage, loc: storage)
+    las = torch.load('../models1/0model.pt', map_location=lambda storage, loc: storage)
+    las.teacher_forcing_ratio = 0.0
+    las = las.cuda()
     predictor = Predictor(las)
+    
     predictor.predict(test_dataloader)
 
 
