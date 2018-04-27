@@ -13,7 +13,7 @@ from trainer.trainer import Trainer
 import torch.nn as nn
 
 if __name__ == "__main__":
-    U.set_random_seeds(1)
+    #U.set_random_seeds(1)
 
     lang = Lang()
     trans = U.tokenizeTranscripts('train')
