@@ -5,8 +5,8 @@ import os
 import constants as C
 import torch
 from torch.autograd import Variable
-import torch.nn.functional as F
 
+import os
 
 def getTranscriptsPath(mode):
     transcripts_path = (C.DATA_PATH+"%s_transcripts.npy") % (mode)
@@ -54,14 +54,14 @@ def var(tensor):
     else:
         return Variable(tensor)
 
+
 def set_random_seeds(seed):
     np.random.seed(0)
     torch.manual_seed(42)
 
 
 def checkpoint(epoch, model):
-    torch.save(model, os.path.join('../models/', epoch+C.MODEL_NAME))
-
+    torch.save(model, os.path.join('../models1/', str(epoch)+C.MODEL_NAME))
 
 
 if __name__ == "__main__":

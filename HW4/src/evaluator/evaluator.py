@@ -2,7 +2,6 @@ import data.utils as U
 import torch
 
 class Evaluator():
-
 	def __init__(self, criterion):
 		super(Evaluator, self).__init__()
 		self.criterion = criterion
@@ -39,6 +38,4 @@ class Evaluator():
 			batch_loss = self._eval_batch(model, input_variables, input_lengths, target_variables)
 			epoch_loss += batch_loss
 
-		print("epoch %d val_epoch_loss %f" % (epoch, epoch_loss/num_batches))
-
-
+		return (epoch_loss/num_batches)

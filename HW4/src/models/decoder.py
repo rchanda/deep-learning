@@ -21,9 +21,9 @@ class DecoderRNN(nn.Module):
         #self.attention_combine = nn.Linear(value_size+embedding_size, hidden_size)
 
         self.params_h0 = nn.ParameterList(
-           [nn.Parameter(torch.FloatTensor(1, self.hidden_size)) for i in range(self.num_layers)])
+           [nn.Parameter(torch.zeros(1, self.hidden_size)).float() for i in range(self.num_layers)])
         self.params_c0 = nn.ParameterList(
-           [nn.Parameter(torch.FloatTensor(1, self.hidden_size)) for i in range(self.num_layers)])
+           [nn.Parameter(torch.zeros(1, self.hidden_size)).float() for i in range(self.num_layers)])
 
         self.lstmCells = nn.ModuleList(
             [nn.LSTMCell(input_size=value_size+embedding_size, hidden_size=self.hidden_size),
