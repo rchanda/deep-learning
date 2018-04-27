@@ -121,7 +121,7 @@ def _test():
 
     decoder = DecoderRNN(output_size, embedding_size, hidden_size, key_size, value_size, num_layers)
     
-    if U.is_cuda():
+    if U.use_cuda():
         decoder = decoder.cuda()
     
     decoder_outputs = decoder(decoder_targets, encoder_keys, encoder_values, encoder_lens)

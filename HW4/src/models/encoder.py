@@ -98,7 +98,7 @@ def _test():
     p_layers = 3
 
     encoder = EncoderRNN(input_size, hidden_size, key_size, value_size, num_layers, bidirectional, p_layers)
-    if U.is_cuda():
+    if U.use_cuda():
         encoder = encoder.cuda()
     keys, values, lengths = encoder(input_variable, input_lengths[::-1])
 

@@ -34,7 +34,7 @@ def create_mask(lengths_array):
     
     mask = torch.ones(array_len, max_len)
     
-    if is_cuda():
+    if use_cuda():
         mask = mask.type(torch.cuda.ByteTensor)
     else:
         mask = mask.type(torch.ByteTensor)
@@ -44,12 +44,12 @@ def create_mask(lengths_array):
     return mask
 
 
-def is_cuda():
+def use_cuda():
     return torch.cuda.is_available()
 
 
 def var(tensor):
-    if is_cuda():
+    if use_cuda():
         return Variable(tensor).cuda()
     else:
         return Variable(tensor)

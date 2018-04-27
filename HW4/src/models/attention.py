@@ -69,7 +69,7 @@ def _test():
     mask = U.create_mask(inputs_lens).unsqueeze(1)
 
     attention = Attention(hidden_size, key_size, value_size, output_size)
-    if U.is_cuda():
+    if U.use_cuda():
         attention = attention.cuda()
 
     attention.set_mask(mask)

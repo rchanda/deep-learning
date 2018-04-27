@@ -15,13 +15,13 @@ if __name__ == "__main__":
     U.set_random_seeds(1)
 
     lang = Lang()
-    trans = U.tokenizeTranscripts('train') #train
+    trans = U.tokenizeTranscripts('train')
     lang.init_lang(trans)
     output_size = lang.num_items
 
     batch_size = 32
     print("Starting .. ..")
-    train_dataset = SpeechDataset(lang, 'train')
+    train_dataset = SpeechDataset(lang, 'dev') # TODO - Change to train
     train_dataloader = SpeechDataLoader(train_dataset, batch_size=batch_size)
 
     dev_dataset = SpeechDataset(lang, 'dev')
@@ -44,12 +44,14 @@ if __name__ == "__main__":
     teacher_forcing_ratio = 1.0
     las = LAS(encoder, decoder, teacher_forcing_ratio)
 
-    if U.is_cuda():
+    if U.use_cuda():
         las = las.cuda()
     print(las)
     
     num_epochs = 15
     lr = 0.001
 
-    trainer = Trainer()
-    trainer.train(train_dataloader, las, lr, num_epochs)
+    criterion = nn.CrossEntropyLoss(size_average=False, ignore_index=C.PAD_TOKEN_IDX)
+
+    trainer = Trainer(criterion)
+    trainer.train(train_dataloader=train_dataloader, dev_dataloader=dev_dataloader, model=las, lr=lr, num_epochs=num_epochs)
