@@ -20,7 +20,7 @@ def tokenizeTranscripts(mode):
     data = []
     for string in transcripts:
         #string = string.encode('utf-8')
-        string = re.sub(r"[^A-Z0-9 ,.']+", r" ", string)
+        #string = re.sub(r"[^A-Z0-9 ,.']+", r" ", string)
         data.append(list(string))
     data = np.asarray(data)
 
