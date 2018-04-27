@@ -1,10 +1,10 @@
 import re
 import numpy as np
+import os
 
 import constants as C
 import torch
 from torch.autograd import Variable
-
 import torch.nn.functional as F
 
 
@@ -59,6 +59,11 @@ def set_random_seeds(seed):
     torch.manual_seed(42)
 
 
+def checkpoint(epoch, model):
+    torch.save(model, os.path.join('../models/', epoch+C.MODEL_NAME))
+
+
+
 if __name__ == "__main__":
     lengths_array = [2,3,5]
     mask = create_mask(lengths_array)
@@ -71,6 +76,5 @@ if __name__ == "__main__":
     print(attention)
 
     print(F.softmax(attention, dim=1))
-
 
 

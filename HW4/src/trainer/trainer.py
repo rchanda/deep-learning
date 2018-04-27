@@ -1,12 +1,10 @@
 import data.utils as U
-import constants as C
 
 import numpy as np
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
 import itertools
-import os
 
 from evaluator.evaluator import Evaluator
 
@@ -67,10 +65,6 @@ class Trainer:
             self.evaluator.evaluate(model, dev_dataloader)
 
             if epoch % 2 == 0:
-                torch.save({'epoch': epoch,
-                    'optimizer': self.optimizer
-                   },
-                   os.path.join('../models/'+epoch, C.TRAINER_STATE_NAME))
-                torch.save(model, os.path.join('../models/'+epoch, C.MODEL_NAME))
+                U.checkpoint(epoch, model)
 
 

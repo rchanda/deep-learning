@@ -20,10 +20,10 @@ class DecoderRNN(nn.Module):
 
         #self.attention_combine = nn.Linear(value_size+embedding_size, hidden_size)
 
-        #self.params_h0 = nn.ParameterList(
-        #   [nn.Parameter(torch.FloatTensor(1, self.hidden_size)) for i in range(self.num_layers)])
-        #self.params_c0 = nn.ParameterList(
-        #   [nn.Parameter(torch.FloatTensor(1, self.hidden_size)) for i in range(self.num_layers)])
+        self.params_h0 = nn.ParameterList(
+           [nn.Parameter(torch.FloatTensor(1, self.hidden_size)) for i in range(self.num_layers)])
+        self.params_c0 = nn.ParameterList(
+           [nn.Parameter(torch.FloatTensor(1, self.hidden_size)) for i in range(self.num_layers)])
 
         self.lstmCells = nn.ModuleList(
             [nn.LSTMCell(input_size=value_size+embedding_size, hidden_size=self.hidden_size),
@@ -93,9 +93,9 @@ class DecoderRNN(nn.Module):
     def _init_hidden_state(self, batch_size):
         hiddens = []
         for i in range(self.num_layers):
-            #hidden = (self.params_h0[i].expand(batch_size, -1), self.params_c0[i].expand(batch_size, -1))
-            hidden = (U.var(torch.zeros(batch_size, self.hidden_size)),
-                            U.var(torch.zeros(batch_size, self.hidden_size)))
+            hidden = (self.params_h0[i].expand(batch_size, -1), self.params_c0[i].expand(batch_size, -1))
+            #hidden = (U.var(torch.zeros(batch_size, self.hidden_size)),
+            #               U.var(torch.zeros(batch_size, self.hidden_size)))
             hiddens.append(hidden)
         return hiddens
 

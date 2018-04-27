@@ -23,7 +23,7 @@ class SpeechDataset(Dataset):
         assert(self.feats.shape[0] == self.trans.shape[0])
         self.len = self.feats.shape[0]
 
-        #print("%s Dataset Loading Completed" % (mode))
+        print("%s Dataset Loading Completed" % (mode))
 
     def __getitem__(self, index):
         trans = np.append([C.SOS_TOKEN_IDX], self.trans[index])
