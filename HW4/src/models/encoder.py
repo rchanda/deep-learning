@@ -60,8 +60,8 @@ class EncoderRNN(nn.Module):
         # hidden = (num_layers*2, B, H)
 
         for p in range(self.p_layers):
-            packed_output, _ = self.plstms[p](packed_output)
             packed_output = self._pool_packed(packed_output)
+            packed_output, _ = self.plstms[p](packed_output)
 
         output, lengths = pad_packed_sequence(packed_output)
         lengths = np.asarray(lengths)

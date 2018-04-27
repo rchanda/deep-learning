@@ -10,6 +10,7 @@ from models.decoder import DecoderRNN
 from models.las import LAS
 
 from trainer.trainer import Trainer
+import torch.nn as nn
 
 if __name__ == "__main__":
     U.set_random_seeds(1)
@@ -50,6 +51,7 @@ if __name__ == "__main__":
     
     num_epochs = 15
     lr = 0.001
-
-    trainer = Trainer()
-    trainer.train(train_dataloader, las, lr, num_epochs)
+    
+    criterion = nn.CrossEntropyLoss(size_average=False, ignore_index=C.PAD_TOKEN_IDX)
+    trainer = Trainer(criterion)
+    trainer.train(train_dataloader, dev_dataloader, las, lr, num_epochs)

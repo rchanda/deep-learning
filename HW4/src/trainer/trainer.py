@@ -7,11 +7,14 @@ import torch.nn as nn
 from torch.autograd import Variable
 import itertools
 import os
+from evaluator.evaluator import Evaluator
 
 class Trainer:
-    def __init__(self):
+    def __init__(self, criterion):
         super(Trainer, self).__init__()
-        
+        self.criterion = criterion
+        self.evaluator = Evaluator(criterion)
+
     def _train_batch(self, model, input_variables, input_lengths, target_variables):
         batch_size = target_variables.size(0)
         
@@ -33,10 +36,9 @@ class Trainer:
         return acc_loss.data.item()
 
 
-    def train(self, train_dataloader, model, lr, num_epochs):
+    def train(self, train_dataloader, dev_dataloader, model, lr, num_epochs):
         self.max_grad_norm = 5
         self.optimizer = torch.optim.Adam(model.parameters(), lr=lr)
-        self.criterion = nn.CrossEntropyLoss(size_average=False, ignore_index=C.PAD_TOKEN_IDX)
         
         for epoch in range(num_epochs):
             model.train(True)
@@ -58,12 +60,10 @@ class Trainer:
                 if batch_idx % 50 == 0:
                     print("batch %d avg_loss %f" % (batch_idx, epoch_loss/(batch_idx+1)))
                 
-            print("epoch %d epoch_loss %f" % (epoch, epoch_loss/num_batches))
+            print("epoch %d train_epoch_loss %f" % (epoch, epoch_loss/num_batches))
             if epoch % 2 == 0:
-                torch.save({'epoch': epoch,
-                    'optimizer': self.optimizer
-                   },
-                   os.path.join('../models/'+epoch, C.TRAINER_STATE_NAME))
-                torch.save(model, os.path.join('../models/'+epoch, C.MODEL_NAME))
+                U.checkpoint(epoch, model)
+            val_epoch_loss = self.evaluator.evaluate(model, dev_dataloader)
+            print("epoch %d val_epoch_loss %f" % (epoch, val_epoch_loss))
 
 

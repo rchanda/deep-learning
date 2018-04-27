@@ -4,6 +4,7 @@ import numpy as np
 import constants as C
 import torch
 from torch.autograd import Variable
+import os
 
 import torch.nn.functional as F
 
@@ -58,6 +59,8 @@ def set_random_seeds(seed):
     np.random.seed(0)
     torch.manual_seed(42)
 
+def checkpoint(epoch, model):
+    torch.save(model, os.path.join('../models1/', str(epoch)+C.MODEL_NAME))
 
 if __name__ == "__main__":
     lengths_array = [2,3,5]
