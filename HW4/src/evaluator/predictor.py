@@ -33,8 +33,9 @@ class Predictor:
 
         for i in range(batch_size):
             length = lengths[i]
+            
+            tgt_id_seq = [sequences[di,i].item() for di in range(length)]
 
-            tgt_id_seq = [sequences[di,i,0].item() for di in range(length)]
             tgt_seq = self.lang.indices2items(tgt_id_seq)
             outFile.write("%d,%s\n" % (step, ''.join(tgt_seq)))
             step += 1
@@ -70,12 +71,11 @@ class Predictor:
             
             self.model.teacher_forcing_ratio = 1.0
             decoder_outputs, ret_dict = self.model(input_variables, input_lengths, target_sequences)
-
+            
             acc_loss = self.criterion(decoder_outputs.contiguous(), target_sequences[1:,:].contiguous())
-            acc_loss = acc_loss.view(target_variables.size(0)-1, target_sequences.size(1))
+            acc_loss = acc_loss.view(target_sequences.size(0)-1, target_sequences.size(1))
             acc_loss = acc_loss.sum(0)
-
-            print(acc_loss)
+            
             self.dump_target_sequences(target_sequences, target_lengths, outFile, batch_idx)
 
             print("%d Batch Prediction Completed" % (batch_idx))
