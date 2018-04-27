@@ -64,7 +64,6 @@ class DecoderRNN(nn.Module):
         self.attention.set_mask(mask)
 
         context = U.var(torch.zeros(batch_size, self.value_size).float())
-        print(teacher_forcing_ratio)
         use_teacher_forcing = True if np.random.random() < teacher_forcing_ratio else False
 
         decoder_outputs = []

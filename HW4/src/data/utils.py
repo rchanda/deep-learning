@@ -20,7 +20,7 @@ def tokenizeTranscripts(mode):
     data = []
     for string in transcripts:
         #string = string.encode('utf-8')
-        #string = re.sub(r"[^A-Z0-9 ,.']+", r" ", string)
+        string = re.sub(r"[^A-Z0-9 ,.']+", r" ", string)
         data.append(list(string))
     data = np.asarray(data)
 
@@ -61,7 +61,7 @@ def set_random_seeds(seed):
 
 
 def checkpoint(epoch, model):
-    torch.save(model, os.path.join('../models1/', str(epoch)+C.MODEL_NAME))
+    torch.save(model, os.path.join('saved_models/', str(epoch)+C.MODEL_NAME))
 
 
 if __name__ == "__main__":

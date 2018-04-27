@@ -22,7 +22,7 @@ if __name__ == "__main__":
 
     batch_size = 32
     print("Starting .. ..")
-    train_dataset = SpeechDataset(lang, 'dev') # TODO - Change to train
+    train_dataset = SpeechDataset(lang, 'train') # TODO - Change to train
     train_dataloader = SpeechDataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 
     dev_dataset = SpeechDataset(lang, 'dev')
