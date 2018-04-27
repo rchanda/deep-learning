@@ -40,7 +40,6 @@ class Predictor:
             step += 1
 
 
-
     def predict(self, test_dataloader, outFile):
         self.model.eval()
 
@@ -56,6 +55,7 @@ class Predictor:
 
             input_variables = input_variables.transpose(0,1)
             target_variables = target_variables.transpose(0,1)
+            # T X O
 
             batch_size = target_variables.size(0)
 
@@ -71,8 +71,8 @@ class Predictor:
             self.model.teacher_forcing_ratio = 1.0
             decoder_outputs, ret_dict = self.model(input_variables, input_lengths, target_sequences)
 
-            acc_loss = self.criterion(decoder_outputs.contiguous(), target_variables.contiguous())
-            acc_loss = acc_loss.view(target_variables.size(0), target_variables.size(1))
+            acc_loss = self.criterion(decoder_outputs.contiguous(), target_sequences[:,1:].contiguous())
+            acc_loss = acc_loss.view(target_variables.size(0), target_sequences.size(1))
             acc_loss = acc_loss.sum(0)
 
             print(acc_loss)
@@ -112,7 +112,7 @@ def _test():
     teacher_forcing_ratio = 1.0
     las = LAS(encoder, decoder, teacher_forcing_ratio)
 
-    model = torch.load('../data/saved_models_0.001/6model.pt', map_location=lambda storage, loc: storage)
+    model = torch.load('saved_models/4model.pt', map_location=lambda storage, loc: storage)
     las.load_state_dict(model.state_dict())
 
     #las = torch.load('../data/saved_models_0.0001/7model.pt', map_location=lambda storage, loc: storage)
