@@ -16,7 +16,7 @@ class SpeechDataLoader():
 
 		self.dataloader = DataLoader(dataset, shuffle=True, batch_size=batch_size,
 			collate_fn=collate_fn, num_workers=num_workers, pin_memory=pin_memory)
-		print("%s DataLoader Loading Completed")
+		print("DataLoader Loading Completed")
 
 
 def pad_batch_data(batch_data):
