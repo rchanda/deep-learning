@@ -10,4 +10,7 @@ EOS_TOKEN_IDX = 1
 UNK_TOKEN_IDX = 2
 PAD_TOKEN_IDX = 3
 
+TRAINER_STATE_NAME = 'trainer_states.pt'
+MODEL_NAME = 'model.pt'
+
 DEBUG = True

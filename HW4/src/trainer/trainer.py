@@ -6,6 +6,7 @@ import torch
 import torch.nn as nn
 from torch.autograd import Variable
 import itertools
+import os
 
 class Trainer:
     def __init__(self):
@@ -56,8 +57,13 @@ class Trainer:
                 
                 if batch_idx % 50 == 0:
                     print("batch %d avg_loss %f" % (batch_idx, epoch_loss/(batch_idx+1)))
-           
+                
             print("epoch %d epoch_loss %f" % (epoch, epoch_loss/num_batches))
-
+            if epoch % 2 == 0:
+                torch.save({'epoch': epoch,
+                    'optimizer': self.optimizer
+                   },
+                   os.path.join('../models/'+epoch, C.TRAINER_STATE_NAME))
+                torch.save(model, os.path.join('../models/'+epoch, C.MODEL_NAME))
 
 

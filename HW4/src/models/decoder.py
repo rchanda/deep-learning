@@ -35,7 +35,7 @@ class DecoderRNN(nn.Module):
 
 
     def forward_step(self, input_var, decoder_hiddens, context, encoder_keys, encoder_values):
-        pdb.set_trace()
+        #pdb.set_trace()
         # input_var = (batch_size)
         context = context.squeeze(1)
         # context = (batch_size, value_size)

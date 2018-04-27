@@ -24,7 +24,7 @@ class Attention(nn.Module):
 
 
     def forward(self, outputs, encoder_keys, encoder_values):
-        pdb.set_trace()
+        #pdb.set_trace()
         # outputs = (batch_size, 1, hidden_size)
         # encoder_keys = (input_len, batch_size, key_size)
         # encoder_values = (input_len, batch_size, value_size)
