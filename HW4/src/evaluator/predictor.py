@@ -17,7 +17,7 @@ from models.las import LAS
 
 from loss.loss import CrossEntropyLoss3D
 
-
+import sys
 
 class Predictor:
     def __init__(self, model, lang, criterion):
@@ -25,7 +25,7 @@ class Predictor:
         self.model = model
         self.lang = lang
         self.criterion = criterion
-        self.num_random_samples = 1
+        self.num_random_samples = 100
 
 
     def dump_target_sequences(self, sequences, lengths, outFile, step):
@@ -41,6 +41,7 @@ class Predictor:
             step += 1
 
         return step
+
 
     def predict(self, test_dataloader, outFile):
         self.model.eval()
@@ -96,15 +97,15 @@ class Predictor:
         outFile.close()
 
 
-def _test():
-    #U.set_random_seeds(1)
+def _test(run):
+    U.set_random_seeds(11785)
 
     lang = Lang()
     trans = U.tokenizeTranscripts('train')
     lang.init_lang(trans)
     output_size = lang.num_items
 
-    batch_size = 32
+    batch_size = 1
     print("Starting .. ..")
 
     num_layers = 3
@@ -125,11 +126,8 @@ def _test():
     teacher_forcing_ratio = 1.0
     las = LAS(encoder, decoder, teacher_forcing_ratio)
 
-    model = torch.load('saved_models/8model.pt', map_location=lambda storage, loc: storage)
+    model = torch.load('../saved_models/'+run+'-model.pt', map_location=lambda storage, loc: storage)
     las.load_state_dict(model.state_dict())
-
-    #las = torch.load('../data/saved_models_0.0001/7model.pt', map_location=lambda storage, loc: storage)
-    #las.teacher_forcing_ratio = 0.0
 
     if U.use_cuda():
         las = las.cuda()
@@ -142,11 +140,13 @@ def _test():
     criterion = CrossEntropyLoss3D(reduce=False, ignore_index=C.PAD_TOKEN_IDX)
     predictor = Predictor(las, lang, criterion)
     
-    outFile = open('predictions2.txt', 'w')
+    outFile = open('../predictions-'+run+'.txt', 'w')
     predictor.predict(test_dataloader, outFile)
 
 
 if __name__ == "__main__":
-    _test()
+    run = sys.argv[1]
+    print(run)
+    _test(run)
 
 
