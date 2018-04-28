@@ -25,7 +25,7 @@ class Predictor:
         self.model = model
         self.lang = lang
         self.criterion = criterion
-        self.num_random_samples = 1
+        self.num_random_samples = 100
 
 
     def dump_target_sequences(self, sequences, lengths, outFile, batch_idx):
@@ -61,8 +61,9 @@ class Predictor:
 
             batch_size = target_variables.size(1)
             max_len = self.model.decoder.max_len
+            print(max_len)
 
-            target_sequence_min_loss = [-1.0] * batch_size
+            target_sequence_min_loss = [float('inf')] * batch_size
             target_sequences_final = U.var(torch.zeros(max_len, batch_size))
             target_lengths_final = [0] * batch_size
 
@@ -83,7 +84,7 @@ class Predictor:
                 acc_loss = acc_loss.view(target_sequences.size(0)-1, target_sequences.size(1))
                 acc_loss = acc_loss.sum(0)/target_sequences.size(1)
             
-                for b in batch_size:
+                for b in range(batch_size):
                     if acc_loss[b] < target_sequence_min_loss[b]:
                         target_sequences_final[:,b] = target_sequences[:,b]
                         target_lengths_final[b] = target_lengths[b]
@@ -125,7 +126,7 @@ def _test():
     teacher_forcing_ratio = 1.0
     las = LAS(encoder, decoder, teacher_forcing_ratio)
 
-    model = torch.load('../data/saved_models/4model.pt', map_location=lambda storage, loc: storage)
+    model = torch.load('saved_models/8model.pt', map_location=lambda storage, loc: storage)
     las.load_state_dict(model.state_dict())
 
     #las = torch.load('../data/saved_models_0.0001/7model.pt', map_location=lambda storage, loc: storage)

@@ -35,7 +35,7 @@ class Trainer:
         self.max_grad_norm = 5
         self.optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
-        for epoch in range(num_epochs):
+        for epoch in range(9, num_epochs):
             model.train(True)
 
             epoch_loss = 0
