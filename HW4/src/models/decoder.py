@@ -52,6 +52,11 @@ class DecoderRNN(nn.Module):
         return outputs, new_decoder_hiddens, context
 
 
+    def sample_gumbel(self, shape, eps=1e-10, out=None):
+        U = out.resize_(shape).uniform_() if out is not None else torch.rand(shape)
+        return - torch.log(eps - torch.log(U + eps))
+
+
     def forward(self, decoder_targets, encoder_keys, encoder_values, encoder_lens, teacher_forcing_ratio):
         ret_dict = dict()
 
@@ -73,7 +78,9 @@ class DecoderRNN(nn.Module):
         lengths = np.array([max_target_len] * batch_size)
 
         def decode(step, step_output):
-            symbols = F.softmax(decoder_outputs[-1], dim=1).multinomial(1)
+            gumbel = Variable(self.sample_gumbel(shape=step_output.size(), out=step_output.data.new()))
+            output += gumbel
+            symbols = F.softmax(output, dim=1).topK(1)[1]
             sequence_symbols.append(symbols)
             eos_batches = symbols.data.eq(C.EOS_TOKEN_IDX)
             if eos_batches.dim() > 0:
