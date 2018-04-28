@@ -28,10 +28,9 @@ class Predictor:
         self.num_random_samples = 1
 
 
-    def dump_target_sequences(self, sequences, lengths, outFile, batch_idx):
+    def dump_target_sequences(self, sequences, lengths, outFile, step):
         batch_size = len(lengths)
-        step = batch_size*batch_idx
-
+                
         for i in range(batch_size):
             length = lengths[i]
             
@@ -41,12 +40,12 @@ class Predictor:
             outFile.write("%d,%s\n" % (step, ''.join(tgt_seq)))
             step += 1
 
+        return step
 
     def predict(self, test_dataloader, outFile):
         self.model.eval()
-
-        num_batches = len(test_dataloader.dataloader)
         step = 0
+        num_batches = len(test_dataloader.dataloader)
         outFile.write("Id,Predicted\n")
 
         for (batch_idx, data) in enumerate(test_dataloader.dataloader):
@@ -61,7 +60,7 @@ class Predictor:
 
             batch_size = target_variables.size(1)
             max_len = self.model.decoder.max_len
-            print(max_len)
+            #print(max_len)
 
             target_sequence_min_loss = [float('inf')] * batch_size
             target_sequences_final = U.var(torch.zeros(max_len, batch_size))
@@ -90,9 +89,9 @@ class Predictor:
                         target_lengths_final[b] = target_lengths[b]
 
 
-            self.dump_target_sequences(target_sequences_final, target_lengths, outFile, batch_idx)
+            step = self.dump_target_sequences(target_sequences_final, target_lengths, outFile, step)
 
-            print("%d Batch Prediction Completed" % (batch_idx))
+            print("%d %d Batch Prediction Completed" % (batch_idx, step))
 
         outFile.close()
 
