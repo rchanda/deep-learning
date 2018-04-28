@@ -61,7 +61,7 @@ def set_random_seeds(seed):
 
 
 def checkpoint(epoch, model):
-    torch.save(model, os.path.join('saved_models/', str(epoch)+C.MODEL_NAME))
+    torch.save(model, os.path.join('saved_models-tmp/', str(epoch)+C.MODEL_NAME))
 
 
 if __name__ == "__main__":

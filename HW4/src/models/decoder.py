@@ -78,9 +78,9 @@ class DecoderRNN(nn.Module):
         lengths = np.array([max_target_len] * batch_size)
 
         def decode(step, step_output):
-            gumbel = Variable(self.sample_gumbel(shape=step_output.size(), out=step_output.data.new()))
-            output += gumbel
-            symbols = F.softmax(output, dim=1).topK(1)[1]
+            gumbel = U.var(self.sample_gumbel(shape=step_output.size(), out=step_output.data.new()))
+            step_output += gumbel
+            symbols = F.softmax(step_output, dim=1).topk(1)[1]
             sequence_symbols.append(symbols)
             eos_batches = symbols.data.eq(C.EOS_TOKEN_IDX)
             if eos_batches.dim() > 0:

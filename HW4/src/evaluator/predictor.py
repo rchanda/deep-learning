@@ -25,7 +25,7 @@ class Predictor:
         self.model = model
         self.lang = lang
         self.criterion = criterion
-        self.num_random_samples = 100
+        self.num_random_samples = 1
 
 
     def dump_target_sequences(self, sequences, lengths, outFile, batch_idx):
@@ -143,7 +143,7 @@ def _test():
     criterion = CrossEntropyLoss3D(reduce=False, ignore_index=C.PAD_TOKEN_IDX)
     predictor = Predictor(las, lang, criterion)
     
-    outFile = open('predictions.txt', 'w')
+    outFile = open('predictions2.txt', 'w')
     predictor.predict(test_dataloader, outFile)
 
 

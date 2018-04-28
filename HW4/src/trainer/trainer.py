@@ -58,7 +58,7 @@ class Trainer:
                 
             print("epoch %d train_epoch_loss %f" % (epoch, epoch_loss/num_batches))
 
-            if epoch % 2 == 0:
+            if epoch % 1 == 0:
                 U.checkpoint(epoch, model)
             val_epoch_loss = self.evaluator.evaluate(model, dev_dataloader)
             print("epoch %d val_epoch_loss %f" % (epoch, val_epoch_loss))
